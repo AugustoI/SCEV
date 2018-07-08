@@ -20,28 +20,38 @@ public class Venda implements GladioError {
     /*
      * CODIGOS DE ERRO
      * 00 -> NAO HA ERRO.
-     * 01 ->
-     * 02 ->
-     * 03 ->
-     * 04 ->
-     * 05 ->
-     * 06 ->
-     * 07 ->
-     * 08 ->
-     * 09 ->
-     * 10 ->
-     * 11 ->
+     * 01 -> ERRO NO ID DO PRODUTO.
+     * 02 -> ERRO NO ID DO MOVIMENTO.
+     * 03 -> ERRO NO ID DO TIPO DE MOVIMENTO. 
+     * 04 -> ERRO NO NOME DO PRODUTO.
+     * 05 -> ERRO NO NOME DO MOVIMENTO.
+     * 06 -> ERRO NA DATA DA VENDA.
+     * 07 -> ERRO NA DESCRICAO DO PRODUTO.
+     * 08 -> ERRO NA UNIDADE DO PRODUTO.
+     * 09 -> ERRO NO DEBITO|CREDITO.
+     * 10 -> ERRO NA QUANTIDADE DE PRODUTOS.
+     * 11 -> ERRO NO PRECO DO PRODUTO.
+     * 12 -> PARAMETRO 'confereParametrosNovaVenda' INVALIDO.
      */
     private int codError = 0;
     
+    @Override
     public void setCodError(int codError) {
         this.codError = codError;
     }
     
+    @Override
     public int getCodError() {
         return codError;
     }
     
+    /**
+     * Metodo para conferir se ha erro no programa ou nao.
+     * 
+     * @return retorna true para caso haja erro e
+     *                 false para caso contrario.
+     */
+    @Override
     public boolean hasError() {
         boolean r = true;
         if (getCodError() == 0) {
@@ -50,11 +60,25 @@ public class Venda implements GladioError {
         return r;
     }
     
+    /**
+     * Metodo para obter a mensagem do erro atual.
+     * 
+     * @return retorna a mensagem do erro atual.
+     */
+    @Override
     public String msgError() {
         String msg = msgErrorByCod(getCodError());
         return msg;
     }
     
+    /**
+     * Metodo para obter uma mensagem de erro pelo seu codigo.
+     * 
+     * @param codError - Codigo de erro da respectiva mensagem.
+     * 
+     * @return retorna a mensagem do respectivo codigo.
+     */
+    @Override
     public String msgErrorByCod(int codError) {        
         String msg;
         switch (codError) {
@@ -70,46 +94,65 @@ public class Venda implements GladioError {
     // ------------------------------------------------------------------------------------------------- FIM INTERFACE GLADIOERROR
     
     // ------------------------------------------------------------------------------------------------- INICIO CLASSE VENDA
-    private String Nome_Produto, Nome_Movimento, Data_Aquisicao, Data_Venda, Descricao, Unidade;
-    private char DebitoCredito;
-    private int ID_Produto, ID_Movimento, ID_TipoMovimento, Quantidade;
-    private float Preco_Venda;
+    private String nomeProduto, nomeMovimento, dataVenda, descricao, unidade;
+    private char debitoCredito;
+    private int idProduto, idMovimento, idTipoMovimento, quantidade;
+    private float precoVenda;
 
     /*
      * Metodo para venda de um novo produto atraves de seu codigo.
      */
-    public void novaVenda(int idProduto, String nomeMovimento, String dataVenda, 
-                          String unidade, int quantidade, char debCred, float preco) {
-        // Testar se os parametros sao validos.
-        if (idProduto < 0 || nomeMovimento == null || dataVenda == null ||
-            unidade == null || quantidade <= 0 || eDebCred(debCred) || preco < 0.0) {
-            // Decidir se vou testar um por um e setar seu erro ou se vou apenas dizer que
-            // ha erro na venda.
+    public void novaVenda(int idProduto, String nomeMovimento, String dataVenda, String descricao, 
+                          String unidade, char debCred, int quantidade, float preco) {
+        // setar dados
+        setIDProduto(idProduto);
+        setNomeMovimento(nomeMovimento);
+        setDataVenda(dataVenda);
+        setDescricao(descricao);
+        setUnidade(unidade);
+        setDebitoCredito(debCred);
+        setQuantidade(quantidade);
+        setPrecoVenda(preco);
+        // conferir se estao corretos
+        confereParametrosNovaVenda('I');
+        // verificar se ha erros
+        if (hasError()) {
+            String msgError = msgError();
         } else {
-            // caso os parametros estejam corretos:
-            // cod here
+            
         }
     }
     
     /*
      * Metodo para venda de um novo produto atraves de seu nome.
      */
-    public void novaVenda(String nomeProduto, String nomeMovimento, String dataVenda, 
-                          String unidade, int quantidade, char debCred, float preco) {
-        // Testar se os parametros sao validos.
-        if (nomeProduto == null || nomeMovimento == null || dataVenda == null ||
-            unidade == null || quantidade <= 0 || eDebCred(debCred) || preco < 0.0) {
-            // Decidir se vou testar um por um e setar seu erro ou se vou apenas dizer que
-            // ha erro na venda.
+    public void novaVenda(String nomeProduto, String nomeMovimento, String dataVenda, String descricao, 
+                          String unidade, char debCred, int quantidade, float preco) {
+        // setar dados
+        setNomeProduto(nomeProduto);
+        setNomeMovimento(nomeMovimento);
+        setDataVenda(dataVenda);
+        setDescricao(descricao);
+        setUnidade(unidade);
+        setDebitoCredito(debCred);
+        setQuantidade(quantidade);
+        setPrecoVenda(preco);
+        // conferir se estao corretos
+        confereParametrosNovaVenda('N');
+        // verificar se ha erros
+        if (hasError()) {
+            String msgError = msgError();
         } else {
-            // caso os parametros estejam corretos:
-            // cod here
+            
         }
     }
     
     // ------------------------------------------------------------------------------------------------- INICIO AUXILIARES CLASSE VENDA
     /*
      * Metodo para conferir se o debito|credito e valido.
+     *
+     * @return retorna true para caso haja erro e
+     *                 false para caso contrario.
      */
     public boolean eDebCred(char debCred) {
         boolean r = false;
@@ -119,103 +162,147 @@ public class Venda implements GladioError {
         }
         return r;
     }
+    
+    /**
+     * Metodo para conferir se os parametros da venda sao validos.
+     *
+     * @param cod - Codigo contendo 'n', 'N', 'i' ou 'I' para informar
+     *              se a compra esta sendo realizada atraves do codigo
+     *              ou do nome do produto
+     */
+    public void confereParametrosNovaVenda(char cod) {
+        if (cod != 'n' && cod != 'N' &&
+            cod != 'i' && cod != 'I') {
+            setCodError(12);
+        } else {
+            if (getNomeMovimento() == null) {
+                setCodError(5);
+            } else {
+                if (getDataVenda() == null) {
+                    setCodError(6);
+                } else {
+                    if (getDescricao() == null) {
+                        setCodError(7);
+                    } else {
+                        if (getUnidade() == null) {
+                            setCodError(8);
+                        } else {
+                            if (!eDebCred(getDebitoCredito())) {
+                                setCodError(9);
+                            } else {
+                                if (getQuantidade() <= 0) {
+                                    setCodError(10);
+                                } else {
+                                    if (getPrecoVenda() < 0.0) {
+                                        setCodError(11);
+                                    } else {
+                                        if (cod == 'n' || cod == 'N') {
+                                            if (getNomeProduto() == null) {
+                                                setCodError(4);
+                                            }
+                                        } else {
+                                            if (getIDProduto() < 0) {
+                                                setCodError(0);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     // ------------------------------------------------------------------------------------------------- INICIO AUXILIARES CLASSE VENDA
     
     // ------------------------------------------------------------------------------------------------- INICIO SET|GET CLASSE VENDA
-    public String getNome_Produto() {
-        return Nome_Produto;
+    public String getNomeProduto() {
+        return nomeProduto;
     }
 
-    public void setNome_Produto(String Nome_Produto) {
-        this.Nome_Produto = Nome_Produto;
+    public void setNomeProduto(String nomeProduto) {
+        this.nomeProduto = nomeProduto;
     }
 
-    public String getNome_Movimento() {
-        return Nome_Movimento;
+    public String getNomeMovimento() {
+        return nomeMovimento;
     }
 
-    public void setNome_Movimento(String Nome_Movimento) {
-        this.Nome_Movimento = Nome_Movimento;
+    public void setNomeMovimento(String nomeMovimento) {
+        this.nomeMovimento = nomeMovimento;
+    }
+    
+    public String getDataVenda() {
+        return dataVenda;
     }
 
-    public String getData_Aquisicao() {
-        return Data_Aquisicao;
-    }
-
-    public void setData_Aquisicao(String Data_Aquisicao) {
-        this.Data_Aquisicao = Data_Aquisicao;
-    }
-
-    public String getData_Venda() {
-        return Data_Venda;
-    }
-
-    public void setData_Venda(String Data_Venda) {
-        this.Data_Venda = Data_Venda;
+    public void setDataVenda(String dataVenda) {
+        this.dataVenda = dataVenda;
     }
 
     public String getDescricao() {
-        return Descricao;
+        return descricao;
     }
 
-    public void setDescricao(String Descricao) {
-        this.Descricao = Descricao;
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
     }
 
     public String getUnidade() {
-        return Unidade;
+        return unidade;
     }
 
-    public void setUnidade(String Unidade) {
-        this.Unidade = Unidade;
+    public void setUnidade(String unidade) {
+        this.unidade = unidade;
     }
 
     public char getDebitoCredito() {
-        return DebitoCredito;
+        return debitoCredito;
     }
 
-    public void setDebitoCredito(char DebitoCredito) {
-        this.DebitoCredito = DebitoCredito;
+    public void setDebitoCredito(char debitoCredito) {
+        this.debitoCredito = debitoCredito;
     }
 
-    public int getID_Produto() {
-        return ID_Produto;
+    public int getIDProduto() {
+        return idProduto;
     }
 
-    public void setID_Produto(int ID_Produto) {
-        this.ID_Produto = ID_Produto;
+    public void setIDProduto(int idProduto) {
+        this.idProduto = idProduto;
     }
 
-    public int getID_Movimento() {
-        return ID_Movimento;
+    public int getIDMovimento() {
+        return idMovimento;
     }
 
-    public void setID_Movimento(int ID_Movimento) {
-        this.ID_Movimento = ID_Movimento;
+    public void setIDMovimento(int idMovimento) {
+        this.idMovimento = idMovimento;
     }
 
-    public int getID_TipoMovimento() {
-        return ID_TipoMovimento;
+    public int getIDTipoMovimento() {
+        return idTipoMovimento;
     }
 
-    public void setID_TipoMovimento(int ID_TipoMovimento) {
-        this.ID_TipoMovimento = ID_TipoMovimento;
+    public void setIDTipoMovimento(int idTipoMovimento) {
+        this.idTipoMovimento = idTipoMovimento;
     }
 
     public int getQuantidade() {
-        return Quantidade;
+        return quantidade;
     }
 
-    public void setQuantidade(int Quantidade) {
-        this.Quantidade = Quantidade;
+    public void setQuantidade(int quantidade) {
+        this.quantidade = quantidade;
     }
 
-    public float getPreco_Venda() {
-        return Preco_Venda;
+    public float getPrecoVenda() {
+        return precoVenda;
     }
 
-    public void setPreco_Venda(float Preco_Venda) {
-        this.Preco_Venda = Preco_Venda;
+    public void setPrecoVenda(float precoVenda) {
+        this.precoVenda = precoVenda;
     }    
     // ------------------------------------------------------------------------------------------------- INICIO SET|GET CLASSE VENDA
     // ------------------------------------------------------------------------------------------------- FIM CLASSE VENDA    
