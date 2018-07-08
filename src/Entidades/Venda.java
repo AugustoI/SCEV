@@ -63,8 +63,55 @@ public class Venda implements GladioError {
     private String Nome_Produto, Nome_Movimento, Data_Aquisicao, Data_Venda, Descricao, Unidade;
     private char DebitoCredito;
     private int ID_Produto, ID_Movimento, ID_TipoMovimento, Quantidade;
-    private float Preço_Venda;
+    private float Preco_Venda;
 
+    /*
+     * Metodo para venda de um novo produto atraves de seu codigo.
+     */
+    public void novaVenda(int idProduto, String nomeMovimento, String dataVenda, 
+                          String unidade, int quantidade, char debCred, float preco) {
+        // Testar se os parametros sao validos.
+        if (idProduto < 0 || nomeMovimento == null || dataVenda == null ||
+            unidade == null || quantidade <= 0 || eDebCred(debCred) || preco < 0.0) {
+            // Decidir se vou testar um por um e setar seu erro ou se vou apenas dizer que
+            // ha erro na venda.
+        } else {
+            // caso os parametros estejam corretos:
+            // cod here
+        }
+    }
+    
+    /*
+     * Metodo para venda de um novo produto atraves de seu nome.
+     */
+    public void novaVenda(String nomeProduto, String nomeMovimento, String dataVenda, 
+                          String unidade, int quantidade, char debCred, float preco) {
+        // Testar se os parametros sao validos.
+        if (nomeProduto == null || nomeMovimento == null || dataVenda == null ||
+            unidade == null || quantidade <= 0 || eDebCred(debCred) || preco < 0.0) {
+            // Decidir se vou testar um por um e setar seu erro ou se vou apenas dizer que
+            // ha erro na venda.
+        } else {
+            // caso os parametros estejam corretos:
+            // cod here
+        }
+    }
+    
+    // ------------------------------------------------------------------------------------------------- INICIO AUXILIARES CLASSE VENDA
+    /*
+     * Metodo para conferir se o debito|credito e valido.
+     */
+    public boolean eDebCred(char debCred) {
+        boolean r = false;
+        if (debCred == 'C' || debCred == 'c' ||
+            debCred == 'D' || debCred == 'd') {
+            r = true;
+        }
+        return r;
+    }
+    // ------------------------------------------------------------------------------------------------- INICIO AUXILIARES CLASSE VENDA
+    
+    // ------------------------------------------------------------------------------------------------- INICIO SET|GET CLASSE VENDA
     public String getNome_Produto() {
         return Nome_Produto;
     }
@@ -153,12 +200,13 @@ public class Venda implements GladioError {
         this.Quantidade = Quantidade;
     }
 
-    public float getPreço_Venda() {
-        return Preço_Venda;
+    public float getPreco_Venda() {
+        return Preco_Venda;
     }
 
-    public void setPreço_Venda(float Preço_Venda) {
-        this.Preço_Venda = Preço_Venda;
+    public void setPreco_Venda(float Preco_Venda) {
+        this.Preco_Venda = Preco_Venda;
     }    
+    // ------------------------------------------------------------------------------------------------- INICIO SET|GET CLASSE VENDA
     // ------------------------------------------------------------------------------------------------- FIM CLASSE VENDA    
 }
