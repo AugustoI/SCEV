@@ -13,7 +13,7 @@ package pacote;
  * @author Couth
  */
 public class Venda implements GladioError {
-    
+    // a
     // ------------------------------------------------------------------------------------------------- INICIO INTERFACE GLADIOERROR
     /*
      * CODIGOS DE ERRO
