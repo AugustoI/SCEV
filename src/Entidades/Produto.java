@@ -33,7 +33,7 @@ public class Produto {
             //-Produtos (ID_Produto, NomeProduto, DataAquisição, Descrição, Quantidade, Unidade, Custo, Preco)
             setID_Produto(rsSelect.getInt("ID_Produto"));
             setNomeProduto(rsSelect.getString("NomeProduto"));
-            //setDataAquisicao(rsSelect.sss);
+            setDataAquisicao(rsSelect.getDate("DataAquisicao"));
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro inesperado - Comunique a Gládio"
                               , JOptionPane.ERROR_MESSAGE);
