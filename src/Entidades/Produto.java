@@ -79,10 +79,10 @@ public class Produto {
         Connection con;
         try {
             con = new ConexaoDAO().conectar();
-            PreparedStatement sqlEdit = con.prepareStatement(" update Produtos  ("
+            PreparedStatement sqlEdit = con.prepareStatement(" update Produtos  ( "
                     + " set NomeProduto = ? "
                     + "    ,DataAquisicao = ? "
-                    + "    ,Descricao = ?"
+                    + "    ,Descricao = ? "
                     + "    ,Quantidade = ? "
                     + "    ,Unidade = ? "
                     + "    ,Custo = ? "
