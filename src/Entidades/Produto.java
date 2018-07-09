@@ -6,8 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 /**
  *
@@ -15,13 +13,14 @@ import javax.swing.JOptionPane;
  */
 public class Produto {
     //-Produtos (ID_Produto, NomeProduto, DataAquisição, Descrição, Quantidade, Unidade, Custo, Preco)
-    public int ID_Produto;
-    public String NomeProduto;
-    public Date DataAquisicao;
-    public double Quantidade;
-    public char Unidade;
-    public double Custo;
-    public double Preco;
+    private int ID_Produto;
+    private String NomeProduto;
+    private Date DataAquisicao;
+    private String Descricao;
+    private double Quantidade;
+    private String Unidade;
+    private double Custo;
+    private double Preco;
     
     public void BuscarProduto(int ID){
         Connection con;
@@ -30,10 +29,15 @@ public class Produto {
             PreparedStatement sqlBusca = con.prepareStatement("SELECT * FROM Produtos WHERE ID_Produto = ?"); 
             sqlBusca.setInt(1, ID);
             ResultSet rsSelect = sqlBusca.executeQuery();
-            //-Produtos (ID_Produto, NomeProduto, DataAquisição, Descrição, Quantidade, Unidade, Custo, Preco)
+            
             setID_Produto(rsSelect.getInt("ID_Produto"));
             setNomeProduto(rsSelect.getString("NomeProduto"));
             setDataAquisicao(rsSelect.getDate("DataAquisicao"));
+            setDescricao(rsSelect.getString("Descricao"));
+            setQuantidade(rsSelect.getDouble("Quantidade"));
+            setUnidade(rsSelect.getString("Unidade"));
+            setCusto(rsSelect.getDouble("Custo"));
+            setPreco(rsSelect.getDouble("Preco"));
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro inesperado - Comunique a Gládio"
                               , JOptionPane.ERROR_MESSAGE);
@@ -72,11 +76,11 @@ public class Produto {
         this.Quantidade = Quantidade;
     }
 
-    public char getUnidade() {
+    public String getUnidade() {
         return Unidade;
     }
 
-    public void setUnidade(char Unidade) {
+    public void setUnidade(String Unidade) {
         this.Unidade = Unidade;
     }
 
@@ -94,6 +98,14 @@ public class Produto {
 
     public void setPreco(double Preco) {
         this.Preco = Preco;
+    }
+    
+    public String getDescricao() {
+        return Descricao;
+    }
+
+    public void setDescricao(String Descricao) {
+        this.Descricao = Descricao;
     }
     
 }
