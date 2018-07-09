@@ -74,6 +74,37 @@ public class Produto {
         }
         
     }
+    
+    public void EditarProduto(){
+        Connection con;
+        try {
+            con = new ConexaoDAO().conectar();
+            PreparedStatement sqlEdit = con.prepareStatement(" update Produtos  ("
+                    + " set NomeProduto = ? "
+                    + "    ,DataAquisicao = ? "
+                    + "    ,Descricao = ?"
+                    + "    ,Quantidade = ? "
+                    + "    ,Unidade = ? "
+                    + "    ,Custo = ? "
+                    + "    ,Preco = ? )");
+            //-Produtos (ID_Produto, NomeProduto, DataAquisição, Descrição, Quantidade, Unidade, Custo, Preco)
+            sqlEdit.setString(1, this.getNomeProduto());
+            sqlEdit.setDate(2, (java.sql.Date) this.getDataAquisicao());
+            sqlEdit.setString(3, this.getDescricao());
+            sqlEdit.setDouble(4, this.getQuantidade());
+            sqlEdit.setString(5, this.getUnidade());
+            sqlEdit.setDouble(6, this.getCusto());
+            sqlEdit.setDouble(7, this.getPreco());
+            
+            int executeUpdate = sqlEdit.executeUpdate();
+            
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage()
+                        ,"Erro inesperado ao tentar editar produto - Comunique a Gládio - " + ex.getMessage() 
+                        ,JOptionPane.ERROR_MESSAGE);
+        }
+        
+    }
 
     public int getID_Produto() {
         return ID_Produto;
