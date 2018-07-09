@@ -19,7 +19,7 @@ import java.sql.SQLException;
 public class ConexaoDAO {
     private final String URL = "jdbc:mysql://localhost";
     private final String USUARIO = "root";
-    private final String SENHA = ""; 
+    private final String SENHA = "JOAOH123"; 
     
     public Connection conectar() throws SQLException {
         return DriverManager.getConnection(URL, USUARIO, SENHA);

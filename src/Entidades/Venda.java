@@ -119,7 +119,8 @@ public class Venda implements GladioError {
         if (hasError()) {
             String msgError = msgError();
         } else {
-            
+            // obter quantidade disponivel e conferir se
+            // quantidade contem no estoque.
         }
     }
     
