@@ -10,6 +10,7 @@ package Entidades;
 
 import DAO.VendasDAO;
 import Interface.GladioError;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -20,6 +21,12 @@ import java.util.Date;
  * @author Couth
  */
 public class Venda implements GladioError {
+    
+    public static void main(String[] args) {
+        Venda v = new Venda();
+        String a = v.novaVenda(1, "VENDA", "23/02/2018 00:14:15", "PRODUTO", "U", 'C', 2, 10.90f);
+        System.out.println(a);
+    }
     
     // ------------------------------------------------------------------------------------------------- INICIO INTERFACE GLADIOERROR
     /*
@@ -139,8 +146,8 @@ public class Venda implements GladioError {
                         DateFormat formatoData = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
                         Date date = new Date();
                         String dataFormatada = formatoData.format(date);
-                        vDAO.inserirTipoMovimento("VENDA", ""+debCred);
-                        vDAO.inserirMovimentoEstoque(dataFormatada);
+                        //vDAO.inserirTipoMovimento("VENDA", ""+debCred);
+                        vDAO.inserirMovimentoEstoque("VENDA", dataFormatada);
                         vDAO.inserirProdutoMovimento(idProduto, quantidade);
                     } else {
                         setCodError(13);
@@ -153,7 +160,8 @@ public class Venda implements GladioError {
                 // se der certo
                 msgFinal = "Tudo CERTO.";
             } catch (SQLException sqlE) {
-                msgFinal = msgErrorByCod(15);
+                msgFinal = ""+sqlE;
+                //msgFinal = msgErrorByCod(15);
             } catch (Exception e) {
                 msgFinal = ""+e;
             }
