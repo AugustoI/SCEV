@@ -8,7 +8,12 @@
  */
 package Entidades;
 
+import DAO.VendasDAO;
 import Interface.GladioError;
+import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  *
@@ -32,6 +37,9 @@ public class Venda implements GladioError {
      * 10 -> ERRO NA QUANTIDADE DE PRODUTOS.
      * 11 -> ERRO NO PRECO DO PRODUTO.
      * 12 -> PARAMETRO 'confereParametrosNovaVenda' INVALIDO.
+     * 13 -> QUANTIDADE DE COMPRA MAIOR QUE A QUANTIDADE DISPONIVEL NO ESTOQUE.
+     * 13 -> ERRO NA PESQUISA DE QUANTIDADE DISPONIVEL NO ESTOQUE.
+     * 15 -> ERRO SQLEXCEPTION EM VENDAS.
      */
     private int codError = 0;
     
@@ -121,42 +129,34 @@ public class Venda implements GladioError {
         if (hasError()) {
             msgFinal = msgError();
         } else {
-            // obter quantidade disponivel e conferir se
-            // quantidade contem no estoque.
-            
-            // se der certo
-            msgFinal = "";
-        }
-        return msgFinal;
-    }
-    
-    /*
-     * Metodo para venda de um novo produto atraves de seu nome.
-     */
-    public String novaVenda(String nomeProduto, String nomeMovimento, String dataVenda, String descricao, 
-                          String unidade, char debCred, int quantidade, float preco) {
-        // Mensagem a ser retornada
-        String msgFinal;
-        // setar dados
-        setNomeProduto(nomeProduto);
-        setNomeMovimento(nomeMovimento);
-        setDataVenda(dataVenda);
-        setDescricao(descricao);
-        setUnidade(unidade);
-        setDebitoCredito(debCred);
-        setQuantidade(quantidade);
-        setPrecoVenda(preco);
-        // conferir se estao corretos
-        confereParametrosNovaVenda('N');
-        // verificar se ha erros
-        if (hasError()) {
-            msgFinal = msgError();
-        } else {
-            // obter quantidade disponivel e conferir se
-            // quantidade contem no estoque.
-            
-            // se der certo
-            msgFinal = "";
+            try {
+                VendasDAO vDAO = new VendasDAO();
+                // obter quantidade disponivel e conferir se
+                // quantidade contem no estoque.
+                int quantidadeEstoque = vDAO.obterQuantidadeProdutosDisponiveis(idProduto);
+                if (quantidadeEstoque >= 0) {
+                    if (quantidade <= quantidadeEstoque) {
+                        DateFormat formatoData = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                        Date date = new Date();
+                        String dataFormatada = formatoData.format(date);
+                        vDAO.inserirTipoMovimento("VENDA", ""+debCred);
+                        vDAO.inserirMovimentoEstoque(dataFormatada);
+                        vDAO.inserirProdutoMovimento(idProduto, quantidade);
+                    } else {
+                        setCodError(13);
+                        throw new Exception(msgError());
+                    }
+                } else {
+                    setCodError(14);
+                    throw new Exception(msgError());
+                }
+                // se der certo
+                msgFinal = "Tudo CERTO.";
+            } catch (SQLException sqlE) {
+                msgFinal = msgErrorByCod(15);
+            } catch (Exception e) {
+                msgFinal = ""+e;
+            }
         }
         return msgFinal;
     }

@@ -62,15 +62,15 @@ public class VendasDAO {
         }
     }
     
-    public ResultSet obterQuantidadeProdutosDisponiveis(int idProduto) throws SQLException {
+    public int obterQuantidadeProdutosDisponiveis(int idProduto) throws SQLException {
         Connection con = new ConexaoDAO().conectar();
         PreparedStatement SQL = con.prepareStatement("select Quantidade from Produtos where ID_PRODUTO=?");        
         SQL.setInt(1, idProduto);
         ResultSet rs = SQL.executeQuery();
         if (rs.next()) {
-            return rs;
+            return Integer.parseInt(rs.toString());
         } else {
-            return null;
+            return -1;
         }
     }
     // ------------------------------------------------------------------------------------------------- FIM METODOS DE PESQUISA
