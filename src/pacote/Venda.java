@@ -14,7 +14,7 @@ package pacote;
  *
  * @author Couth
  */
-public class Venda implements GladioError {
+public class Venda implements Interface.GladioError {
     
     // ------------------------------------------------------------------------------------------------- INICIO INTERFACE GLADIOERROR
     /*
