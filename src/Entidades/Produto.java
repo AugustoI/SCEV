@@ -6,13 +6,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 /**
  *
  * @author Gustavo
  */
 public class Produto {
-    //-Produtos (ID_Produto, NomeProduto, DataAquisição, Descrição, Quantidade, Unidade, Custo, Preco)
     private int ID_Produto;
     private String NomeProduto;
     private Date DataAquisicao;
@@ -28,20 +29,50 @@ public class Produto {
             con = new ConexaoDAO().conectar();
             PreparedStatement sqlBusca = con.prepareStatement("SELECT * FROM Produtos WHERE ID_Produto = ?"); 
             sqlBusca.setInt(1, ID);
-            ResultSet rsSelect = sqlBusca.executeQuery();
-            
-            setID_Produto(rsSelect.getInt("ID_Produto"));
-            setNomeProduto(rsSelect.getString("NomeProduto"));
-            setDataAquisicao(rsSelect.getDate("DataAquisicao"));
-            setDescricao(rsSelect.getString("Descricao"));
-            setQuantidade(rsSelect.getDouble("Quantidade"));
-            setUnidade(rsSelect.getString("Unidade"));
-            setCusto(rsSelect.getDouble("Custo"));
-            setPreco(rsSelect.getDouble("Preco"));
+            try (ResultSet rsSelect = sqlBusca.executeQuery()) {
+                setID_Produto(rsSelect.getInt("ID_Produto"));
+                setNomeProduto(rsSelect.getString("NomeProduto"));
+                setDataAquisicao(rsSelect.getDate("DataAquisicao"));
+                setDescricao(rsSelect.getString("Descricao"));
+                setQuantidade(rsSelect.getDouble("Quantidade"));
+                setUnidade(rsSelect.getString("Unidade"));
+                setCusto(rsSelect.getDouble("Custo"));
+                setPreco(rsSelect.getDouble("Preco"));
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, ex.getMessage()
+                        ,"Erro inesperado - Comunique a Gládio - " + ex.getMessage() 
+                        ,JOptionPane.ERROR_MESSAGE);
+            }
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage(), "Erro inesperado - Comunique a Gládio"
                               , JOptionPane.ERROR_MESSAGE);
         } 
+    }
+    
+    public void InserirProduto(){
+        Connection con;
+        try {
+            con = new ConexaoDAO().conectar();
+            PreparedStatement sqlInsert = con.prepareStatement(" insert into Produtos  ("
+                    + " NomeProduto, DataAquisicao, Descricao, Quantidade, Unidade, Custo, Preco)"
+                    + " values (?, ?, ?, ?, ?, ?, ?) ");
+            //-Produtos (ID_Produto, NomeProduto, DataAquisição, Descrição, Quantidade, Unidade, Custo, Preco)
+            sqlInsert.setString(1, this.getNomeProduto());
+            sqlInsert.setDate(2, (java.sql.Date) this.getDataAquisicao());
+            sqlInsert.setString(3, this.getDescricao());
+            sqlInsert.setDouble(4, this.getQuantidade());
+            sqlInsert.setString(5, this.getUnidade());
+            sqlInsert.setDouble(6, this.getCusto());
+            sqlInsert.setDouble(7, this.getPreco());
+            
+            int executeUpdate = sqlInsert.executeUpdate();
+            
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage()
+                        ,"Erro inesperado ao tentar inserir produto - Comunique a Gládio - " + ex.getMessage() 
+                        ,JOptionPane.ERROR_MESSAGE);
+        }
+        
     }
 
     public int getID_Produto() {
@@ -107,5 +138,4 @@ public class Produto {
     public void setDescricao(String Descricao) {
         this.Descricao = Descricao;
     }
-    
 }
