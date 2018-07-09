@@ -33,7 +33,7 @@ public class VendasDAO {
         Connection con = new ConexaoDAO().conectar();
         PreparedStatement SQL = con.prepareStatement("insert into MovimentosEstoque (ID_Movimento, DataMovimento, ID_TipoMovimento)"
                 + " values(?,str_to_date(?,\"%d/%m/%Y %H:%i:%s\"),?)");
-        SQL.setInt(1, 8); // TEM QUE FICAR MUDANDO POIS NAO E AUTO INCREMENT
+        SQL.setInt(1, obterIdMovimento()); // TEM QUE FICAR MUDANDO POIS NAO E AUTO INCREMENT
         SQL.setString(2, dataMovimento);
         SQL.setInt(3, obterIdTipoMovimento(nomeMovimento));
         SQL.executeUpdate();
@@ -44,9 +44,9 @@ public class VendasDAO {
         PreparedStatement SQL = con.prepareStatement("insert into ProdutosMovimentos (ID_ProdutoMovimento, ID_Movimento, ID_Produto, Quantidade)"
                 + " values(?,?,?,?)");       
         SQL.setInt(1, 0);   
-        SQL.setInt(2, obterIdMovimento()); // SEM O MAX + 1 FUNCIONA. JA COM NAO FUNCIONA 
-                                           // POIS APONTA PARA UMA POSICAO QUE NAO EXISTE 
-                                           // NA OUTRA TABELA (JA QUE NAO E ADICIONADO)
+        SQL.setInt(2, (obterIdMovimento()-1)); // SEM O MAX + 1 FUNCIONA. JA COM NAO FUNCIONA 
+                                               // POIS APONTA PARA UMA POSICAO QUE NAO EXISTE 
+                                               // NA OUTRA TABELA (JA QUE NAO E ADICIONADO)
         SQL.setInt(3, idProduto);
         SQL.setInt(4, quantidade);
         SQL.executeUpdate();
@@ -56,8 +56,8 @@ public class VendasDAO {
     // ------------------------------------------------------------------------------------------------- INICIO METODOS DE PESQUISA
     private int obterIdMovimento() throws SQLException {
         Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("select max(ID_Movimento) as ID from MovimentosEstoque");     
-        ResultSet rs = SQL.executeQuery(); // MAX + 1 *REMOVIDO*
+        PreparedStatement SQL = con.prepareStatement("select max(ID_Movimento) + 1 as ID from MovimentosEstoque");     
+        ResultSet rs = SQL.executeQuery();
         if (rs.next()) {
             return rs.getInt(1);
         } else {
