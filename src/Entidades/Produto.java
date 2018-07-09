@@ -66,7 +66,7 @@ public class Produto {
             sqlInsert.setDouble(7, this.getPreco());
             
             int executeUpdate = sqlInsert.executeUpdate();
-            
+            JOptionPane.showMessageDialog( null , "Produto inserido." , "Inserir" , JOptionPane.INFORMATION_MESSAGE);
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage()
                         ,"Erro inesperado ao tentar inserir produto - Comunique a Gládio - " + ex.getMessage() 
@@ -96,8 +96,15 @@ public class Produto {
             sqlEdit.setDouble(6, this.getCusto());
             sqlEdit.setDouble(7, this.getPreco());
             
-            int executeUpdate = sqlEdit.executeUpdate();
-            
+            int iConfirm = JOptionPane.showConfirmDialog(null,"Tem certeza que deseja editar esse produto? "
+                    ,"Editar",JOptionPane.YES_NO_CANCEL_OPTION);
+            if (iConfirm == JOptionPane.YES_OPTION) {
+                int executeUpdate = sqlEdit.executeUpdate();
+                JOptionPane.showMessageDialog( null , "Edição concluida." , "Edição" , JOptionPane.INFORMATION_MESSAGE);                 
+            }else {
+                sqlEdit.close();
+                JOptionPane.showMessageDialog( null , "Edição cancelada." , "Cancelar" , JOptionPane.WARNING_MESSAGE);                 
+            }
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage()
                         ,"Erro inesperado ao tentar editar produto - Comunique a Gládio - " + ex.getMessage() 
