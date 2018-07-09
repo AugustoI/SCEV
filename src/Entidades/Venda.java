@@ -102,8 +102,10 @@ public class Venda implements GladioError {
     /*
      * Metodo para venda de um novo produto atraves de seu codigo.
      */
-    public void novaVenda(int idProduto, String nomeMovimento, String dataVenda, String descricao, 
+    public String novaVenda(int idProduto, String nomeMovimento, String dataVenda, String descricao, 
                           String unidade, char debCred, int quantidade, float preco) {
+        // Mensagem a ser retornada
+        String msgFinal;
         // setar dados
         setIDProduto(idProduto);
         setNomeMovimento(nomeMovimento);
@@ -117,18 +119,24 @@ public class Venda implements GladioError {
         confereParametrosNovaVenda('I');
         // verificar se ha erros
         if (hasError()) {
-            String msgError = msgError();
+            msgFinal = msgError();
         } else {
             // obter quantidade disponivel e conferir se
             // quantidade contem no estoque.
+            
+            // se der certo
+            msgFinal = "";
         }
+        return msgFinal;
     }
     
     /*
      * Metodo para venda de um novo produto atraves de seu nome.
      */
-    public void novaVenda(String nomeProduto, String nomeMovimento, String dataVenda, String descricao, 
+    public String novaVenda(String nomeProduto, String nomeMovimento, String dataVenda, String descricao, 
                           String unidade, char debCred, int quantidade, float preco) {
+        // Mensagem a ser retornada
+        String msgFinal;
         // setar dados
         setNomeProduto(nomeProduto);
         setNomeMovimento(nomeMovimento);
@@ -142,10 +150,15 @@ public class Venda implements GladioError {
         confereParametrosNovaVenda('N');
         // verificar se ha erros
         if (hasError()) {
-            String msgError = msgError();
+            msgFinal = msgError();
         } else {
+            // obter quantidade disponivel e conferir se
+            // quantidade contem no estoque.
             
+            // se der certo
+            msgFinal = "";
         }
+        return msgFinal;
     }
     
     // ------------------------------------------------------------------------------------------------- INICIO AUXILIARES CLASSE VENDA

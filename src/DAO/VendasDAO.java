@@ -22,24 +22,28 @@ public class VendasDAO {
     // ------------------------------------------------------------------------------------------------- INICIO METODOS DE INSERCAO
     public void inserirTipoMovimento(String nomeMovimento, String debCred) throws SQLException {
         Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("insert into tipoMovimentos values(0,?,?)"); 
-        SQL.setString(1, nomeMovimento);
-        SQL.setString(2, debCred);
+        PreparedStatement SQL = con.prepareStatement("insert into TiposMovimentos values(?,?,?)");
+        SQL.setInt(1, 0);
+        SQL.setString(2, nomeMovimento);
+        SQL.setString(3, debCred);
         SQL.executeUpdate();
     }
     
-    public void inserirMovimentoEstoque(int idTipoMovimento, String dataMovimento) throws SQLException {
+    public void inserirMovimentoEstoque(String dataMovimento) throws SQLException {
         Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("insert into movimentosEstoque values(0,?,?)");
-        SQL.setInt(1, idTipoMovimento);
-        SQL.setString(2, dataMovimento);
+        PreparedStatement SQL = con.prepareStatement("insert into MovimentosEstoque (ID_Movimento, DataMovimento, ID_TipoMovimento)"
+                + " values(?,?,?)");
+        SQL.setInt(1, 0);
+        SQL.setInt(2, obterIdMovimento());
+        SQL.setString(3, dataMovimento);
         SQL.executeUpdate();
     }
     
-    public void inserirProdutoMovimento(int idMovimento, int idProduto, int quantidade) throws SQLException {
+    public void inserirProdutoMovimento(int idProduto, int quantidade) throws SQLException {
         Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("insert into produtosMovimento values(0,?,?,?)");        
-        SQL.setInt(1, idMovimento);
+        PreparedStatement SQL = con.prepareStatement("insert into ProdutosMovimento (ID_Movimento, ID_Produto, Quantidade)"
+                + " values(?,?,?)");        
+        SQL.setInt(1, obterIdMovimento());
         SQL.setInt(2, idProduto);
         SQL.setInt(3, quantidade);
         SQL.executeUpdate();
@@ -47,33 +51,20 @@ public class VendasDAO {
     // ------------------------------------------------------------------------------------------------- FIM METODOS DE INSERCAO
     
     // ------------------------------------------------------------------------------------------------- INICIO METODOS DE PESQUISA
-    public ResultSet obterIdTipoMovimento(int idProduto) throws SQLException {
+    private int obterIdMovimento() throws SQLException {
         Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("select idTipoMovimento from movimentosEstoque where idProduto=?");        
-        SQL.setInt(1, idProduto);
+        PreparedStatement SQL = con.prepareStatement("select max(ID_Movimento) + 1 as ID from MovimentosEstoque");     
         ResultSet rs = SQL.executeQuery();
         if (rs.next()) {
-            return rs;
+            return Integer.parseInt(rs.toString());
         } else {
-            return null;
-        }
-    }
-    
-    public ResultSet obterIdMovimento(int idProduto) throws SQLException {
-        Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("select idMovimento from movimentosEstoque where idProduto=?");     
-        SQL.setInt(1, idProduto);
-        ResultSet rs = SQL.executeQuery();
-        if (rs.next()) {
-            return rs;
-        } else {
-            return null;
+            return -1;
         }
     }
     
     public ResultSet obterQuantidadeProdutosDisponiveis(int idProduto) throws SQLException {
         Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("select quantidade from produtos where idProduto=?");        
+        PreparedStatement SQL = con.prepareStatement("select Quantidade from Produtos where ID_PRODUTO=?");        
         SQL.setInt(1, idProduto);
         ResultSet rs = SQL.executeQuery();
         if (rs.next()) {
