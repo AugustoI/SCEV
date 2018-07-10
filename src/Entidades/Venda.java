@@ -10,9 +10,8 @@ package Entidades;
 
 import DAO.VendasDAO;
 import Interface.GladioError;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -22,30 +21,22 @@ import java.util.Date;
  */
 public class Venda implements GladioError {
     
-    public static void main(String[] args) {
-        Venda v = new Venda();
-        String a = v.novaVenda(1, "VENDA", "23/02/2018 00:14:15", "PRODUTO", "U", 'C', 2, 10.90f);
-        System.out.println(a);
-    }
-    
     // ------------------------------------------------------------------------------------------------- INICIO INTERFACE GLADIOERROR
     /*
      * CODIGOS DE ERRO
      * 00 -> NAO HA ERRO.
      * 01 -> ERRO NO ID DO PRODUTO.
      * 02 -> ERRO NO ID DO MOVIMENTO.
-     * 03 -> ERRO NO ID DO TIPO DE MOVIMENTO. 
-     * 04 -> ERRO NO NOME DO PRODUTO.
-     * 05 -> ERRO NO NOME DO MOVIMENTO.
-     * 06 -> ERRO NA DATA DA VENDA.
-     * 07 -> ERRO NA DESCRICAO DO PRODUTO.
-     * 08 -> ERRO NA UNIDADE DO PRODUTO.
-     * 09 -> ERRO NO DEBITO|CREDITO.
-     * 10 -> ERRO NA QUANTIDADE DE PRODUTOS.
-     * 11 -> ERRO NO PRECO DO PRODUTO.
+     * 03 -> ERRO NO NOME DO MOVIMENTO.
+     * 04 -> ERRO NA DATA DA VENDA.
+     * 05 -> ERRO NA HORA DA VENDA.
+     * 06 -> ERRO NA QUANTIDADE DE PRODUTOS.
+     * 07 -> QUANTIDADE DE COMPRA MAIOR QUE A QUANTIDADE DISPONIVEL NO ESTOQUE.
+     * 08 -> O ESTOQUE DESTE PRODUTO ESTA VAZIO.
+     * 09 -> ERRO SQL.
+    
      * 12 -> PARAMETRO 'confereParametrosNovaVenda' INVALIDO.
-     * 13 -> QUANTIDADE DE COMPRA MAIOR QUE A QUANTIDADE DISPONIVEL NO ESTOQUE.
-     * 13 -> ERRO NA PESQUISA DE QUANTIDADE DISPONIVEL NO ESTOQUE.
+     * 14 -> ERRO NA PESQUISA DE QUANTIDADE DISPONIVEL NO ESTOQUE.
      * 15 -> ERRO SQLEXCEPTION EM VENDAS.
      */
     private int codError = 0;
@@ -94,14 +85,41 @@ public class Venda implements GladioError {
      * @return retorna a mensagem do respectivo codigo.
      */
     @Override
-    public String msgErrorByCod(int codError) {        
-        String msg;
+    public String msgErrorByCod(int codError) {       
+        String msg, prefix = "[ERRO] Vendas: ";
         switch (codError) {
             case 0:
-                msg = "";
+                msg = prefix+"Não há erros.";
+                break;
+            case 1:
+                msg = prefix+"Erro no código(id) do produto.";
+                break;
+            case 2:
+                msg = prefix+"Erro no id do movimento.";
+                break;
+            case 3:
+                msg = prefix+"Erro no nome do movimento.";
+                break;
+            case 4:
+                msg = prefix+"Erro na data da venda.";
+                break;
+            case 5:
+                msg = prefix+"Erro na hora da venda.";
+                break;
+            case 6:
+                msg = prefix+"Erro na quantidade de produtos.";
+                break;
+            case 7:
+                msg = prefix+"Quantidade de produtos disponiveis é inferior a de compra.";
+                break;
+            case 8:
+                msg = prefix+"O estoque deste produto está vazio.";
+                break;
+            case 9:
+                msg = prefix+"Erro SQL: ";
                 break;
             default:
-                msg = "";
+                msg = prefix+"Código de erro inválido ou não cadastrado.";
                 break;
         }
         return msg;
@@ -109,126 +127,97 @@ public class Venda implements GladioError {
     // ------------------------------------------------------------------------------------------------- FIM INTERFACE GLADIOERROR
     
     // ------------------------------------------------------------------------------------------------- INICIO CLASSE VENDA
-    private String nomeProduto, nomeMovimento, dataVenda, descricao, unidade;
-    private char debitoCredito;
-    private int idProduto, idMovimento, idTipoMovimento, quantidade;
-    private float precoVenda;
+//    private String nomeProduto, nomeMovimento, dataVenda, descricao, unidade;
+//    private char debitoCredito;
+//    private int idProduto, idMovimento, idTipoMovimento, quantidade;
+//    private float precoVenda;
+    private String nomeMovimento, dataVenda, horaVenda;
+    private int idProduto, idMovimento, quantidade;
 
+    
     /*
      * Metodo para venda de um novo produto atraves de seu codigo.
      */
-    public String novaVenda(int idProduto, String nomeMovimento, String dataVenda, String descricao, 
-                          String unidade, char debCred, int quantidade, float preco) {
-        // Mensagem a ser retornada
-        String msgFinal;
-        // setar dados
-        setIDProduto(idProduto);
+    public void novaVenda(int idProduto, int idMovimento, String nomeMovimento, int quantidade) 
+        throws Exception {
+        SimpleDateFormat formatoData = new SimpleDateFormat("dd/MM/yyyy");
+        SimpleDateFormat formatoHora = new SimpleDateFormat("HH:mm:ss");
+        Date date = new Date();
+        String dataFormatada = formatoData.format(date);
+        String horaFormatada = formatoHora.format(date);
+        novaVenda(idProduto, idMovimento, nomeMovimento, dataFormatada, horaFormatada, quantidade);
+    }
+    
+    
+    /*
+     * Metodo para venda de um novo produto atraves de seu codigo.
+     */
+    public void novaVenda(int idProduto, int idMovimento, String nomeMovimento, 
+        String dataVenda, String horaVenda, int quantidade) throws Exception {
+        
+        setIdProduto(idProduto);
+        setIdMovimento(idMovimento);
         setNomeMovimento(nomeMovimento);
         setDataVenda(dataVenda);
-        setDescricao(descricao);
-        setUnidade(unidade);
-        setDebitoCredito(debCred);
+        setHoraVenda(horaVenda);
         setQuantidade(quantidade);
-        setPrecoVenda(preco);
-        // conferir se estao corretos
-        confereParametrosNovaVenda('I');
-        // verificar se ha erros
+        
+        confereParametrosNovaVenda();
+        
         if (hasError()) {
-            msgFinal = msgError();
+            throw new Exception(msgError());
         } else {
             try {
                 VendasDAO vDAO = new VendasDAO();
-                // obter quantidade disponivel e conferir se
-                // quantidade contem no estoque.
-                int quantidadeEstoque = vDAO.obterQuantidadeProdutosDisponiveis(idProduto);
+                int quantidadeEstoque = vDAO.obterQuantidadeProdutosDisponiveis(getIdProduto());
                 if (quantidadeEstoque >= 0) {
                     if (quantidade <= quantidadeEstoque) {
-                        DateFormat formatoData = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                        Date date = new Date();
-                        String dataFormatada = formatoData.format(date);
-                        //vDAO.inserirTipoMovimento("VENDA", ""+debCred);
-                        vDAO.inserirMovimentoEstoque("VENDA", dataFormatada);
-                        vDAO.inserirProdutoMovimento(idProduto, quantidade);
+                        //ResultSet rs = vDAO.inserirMovimentoEstoqueEObterId(getNomeMovimento(), getDataVenda());
+                        //if (rs == null) {
+                            //setCodError(2);
+                            //throw new Exception(msgError());
+                        //} else {
+                        vDAO.inserirProdutoMovimento(getIdProduto(), getIdMovimento(), getQuantidade());
+                        //}
                     } else {
-                        setCodError(13);
+                        setCodError(6);
                         throw new Exception(msgError());
                     }
                 } else {
-                    setCodError(14);
+                    setCodError(7);
                     throw new Exception(msgError());
                 }
-                // se der certo
-                msgFinal = "Tudo CERTO.";
             } catch (SQLException sqlE) {
-                msgFinal = ""+sqlE;
-                //msgFinal = msgErrorByCod(15);
-            } catch (Exception e) {
-                msgFinal = ""+e;
+                setCodError(8);
+                throw new Exception(msgError()+" "+sqlE);
             }
         }
-        return msgFinal;
     }
     
-    // ------------------------------------------------------------------------------------------------- INICIO AUXILIARES CLASSE VENDA
-    /*
-     * Metodo para conferir se o debito|credito e valido.
-     *
-     * @return retorna true para caso haja erro e
-     *                 false para caso contrario.
-     */
-    public boolean eDebCred(char debCred) {
-        boolean r = false;
-        if (debCred == 'C' || debCred == 'c' ||
-            debCred == 'D' || debCred == 'd') {
-            r = true;
-        }
-        return r;
-    }
-    
+    // ------------------------------------------------------------------------------------------------- INICIO AUXILIARES CLASSE VENDA    
     /**
      * Metodo para conferir se os parametros da venda sao validos.
-     *
-     * @param cod - Codigo contendo 'n', 'N', 'i' ou 'I' para informar
-     *              se a compra esta sendo realizada atraves do codigo
-     *              ou do nome do produto
      */
-    public void confereParametrosNovaVenda(char cod) {
-        if (cod != 'n' && cod != 'N' &&
-            cod != 'i' && cod != 'I') {
-            setCodError(12);
+    public void confereParametrosNovaVenda() {
+        if (getIdProduto() < 0) {
+            setCodError(1);
         } else {
-            if (getNomeMovimento() == null) {
-                setCodError(5);
+            if (getIdMovimento() < 0) {
+                setCodError(2);
             } else {
-                if (getDataVenda() == null) {
-                    setCodError(6);
+                if (getNomeMovimento() == null || 
+                    !(getNomeMovimento().equalsIgnoreCase("VENDA") || 
+                      getNomeMovimento().equalsIgnoreCase("COMPRA"))) {
+                    setCodError(3);
                 } else {
-                    if (getDescricao() == null) {
-                        setCodError(7);
+                    if (!eDataValida(getDataVenda())) {
+                        setCodError(4);
                     } else {
-                        if (getUnidade() == null) {
-                            setCodError(8);
+                        if (!eHoraValida(getHoraVenda())) {
+                            setCodError(5);
                         } else {
-                            if (!eDebCred(getDebitoCredito())) {
-                                setCodError(9);
-                            } else {
-                                if (getQuantidade() <= 0) {
-                                    setCodError(10);
-                                } else {
-                                    if (getPrecoVenda() < 0.0) {
-                                        setCodError(11);
-                                    } else {
-                                        if (cod == 'n' || cod == 'N') {
-                                            if (getNomeProduto() == null) {
-                                                setCodError(4);
-                                            }
-                                        } else {
-                                            if (getIDProduto() < 0) {
-                                                setCodError(0);
-                                            }
-                                        }
-                                    }
-                                }
+                            if (getQuantidade() < 0) {
+                                setCodError(6);
                             }
                         }
                     }
@@ -236,17 +225,95 @@ public class Venda implements GladioError {
             }
         }
     }
+    
+    /**
+     * Metodo para conferir se uma data e valida.
+     * 
+     * @param data - data a ser verificada.
+     * 
+     * @return true  -> data valida.
+     *         false -> data invalida.
+     */
+    public boolean eDataValida(String data) {
+        boolean r = true;
+        int tamanho = data.length();
+        if (tamanho == 10) {
+            int i = 0;
+            // testar se o formato da data e valido
+            while (i < tamanho && r) {
+                if (i == 2 || i == 5) {
+                    if (data.charAt(i) != '/') {
+                        r = false;
+                    }
+                } else {
+                    if (data.charAt(i) < '0' ||
+                        data.charAt(i) > '9') {
+                        r = false;
+                    }
+                }
+                i = i + 1;
+            }
+            
+            if (r) {
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                    sdf.setLenient(false);
+                    sdf.parse(data);
+                } catch (ParseException pe) {
+                    r = false;
+                }
+            }
+        } else {
+            r = false;
+        }
+        return r;
+    }
+    
+    /**
+     * Metodo para conferir se uma hora e valida.
+     * 
+     * @param hora - hora a ser verificada.
+     * 
+     * @return true  -> hora valida.
+     *         false -> hora invalida.
+     */
+    public boolean eHoraValida(String hora) {
+        boolean r = true;
+        int tamanho = hora.length();
+        if (tamanho == 8) {
+            int i = 0;
+            // testar se o formato da data e valido
+            while (i < tamanho && r) {
+                if (i == 2 || i == 5) {
+                    if (hora.charAt(i) != ':') {
+                        r = false;
+                    }
+                } else {
+                    if (hora.charAt(i) < '0' ||
+                        hora.charAt(i) > '9') {
+                        r = false;
+                    }
+                }
+                i = i + 1;
+            }
+            
+            if (r) {
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+                    sdf.setLenient(false);
+                    sdf.parse(hora);
+                } catch (ParseException pe) {
+                    r = false;
+                }
+            }
+        } else {
+            r = false;
+        }
+        return r;
+    }
     // ------------------------------------------------------------------------------------------------- INICIO AUXILIARES CLASSE VENDA
     
     // ------------------------------------------------------------------------------------------------- INICIO SET|GET CLASSE VENDA
-    public String getNomeProduto() {
-        return nomeProduto;
-    }
-
-    public void setNomeProduto(String nomeProduto) {
-        this.nomeProduto = nomeProduto;
-    }
-
     public String getNomeMovimento() {
         return nomeMovimento;
     }
@@ -254,7 +321,7 @@ public class Venda implements GladioError {
     public void setNomeMovimento(String nomeMovimento) {
         this.nomeMovimento = nomeMovimento;
     }
-    
+
     public String getDataVenda() {
         return dataVenda;
     }
@@ -263,52 +330,28 @@ public class Venda implements GladioError {
         this.dataVenda = dataVenda;
     }
 
-    public String getDescricao() {
-        return descricao;
+    public String getHoraVenda() {
+        return horaVenda;
     }
 
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
+    public void setHoraVenda(String horaVenda) {
+        this.horaVenda = horaVenda;
     }
 
-    public String getUnidade() {
-        return unidade;
-    }
-
-    public void setUnidade(String unidade) {
-        this.unidade = unidade;
-    }
-
-    public char getDebitoCredito() {
-        return debitoCredito;
-    }
-
-    public void setDebitoCredito(char debitoCredito) {
-        this.debitoCredito = debitoCredito;
-    }
-
-    public int getIDProduto() {
+    public int getIdProduto() {
         return idProduto;
     }
 
-    public void setIDProduto(int idProduto) {
+    public void setIdProduto(int idProduto) {
         this.idProduto = idProduto;
     }
 
-    public int getIDMovimento() {
+    public int getIdMovimento() {
         return idMovimento;
     }
 
-    public void setIDMovimento(int idMovimento) {
+    public void setIdMovimento(int idMovimento) {
         this.idMovimento = idMovimento;
-    }
-
-    public int getIDTipoMovimento() {
-        return idTipoMovimento;
-    }
-
-    public void setIDTipoMovimento(int idTipoMovimento) {
-        this.idTipoMovimento = idTipoMovimento;
     }
 
     public int getQuantidade() {
@@ -318,14 +361,6 @@ public class Venda implements GladioError {
     public void setQuantidade(int quantidade) {
         this.quantidade = quantidade;
     }
-
-    public float getPrecoVenda() {
-        return precoVenda;
-    }
-
-    public void setPrecoVenda(float precoVenda) {
-        this.precoVenda = precoVenda;
-    }    
     // ------------------------------------------------------------------------------------------------- INICIO SET|GET CLASSE VENDA
-    // ------------------------------------------------------------------------------------------------- FIM CLASSE VENDA    
+    // ------------------------------------------------------------------------------------------------- FIM CLASSE VENDA   
 }

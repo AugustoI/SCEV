@@ -20,33 +20,50 @@ import java.sql.SQLException;
 public class VendasDAO {
     // -------------------------------------------------------------------------------------------------------- INICIO METODOS DE INSERCAO|PESQUISA PELO ID_PRODUTO
     // ------------------------------------------------------------------------------------------------- INICIO METODOS DE INSERCAO
-    public void inserirTipoMovimento(String nomeMovimento, String debCred) throws SQLException {
+//    public void inserirTipoMovimento(String nomeMovimento, String debCred) throws SQLException {;
+//        Connection con = new ConexaoDAO().conectar();
+//        PreparedStatement SQL = con.prepareStatement("insert into TiposMovimentos values(?,?,?)");
+//        SQL.setInt(1, 0);
+//        SQL.setString(2, nomeMovimento);
+//        SQL.setString(3, debCred);
+//        SQL.executeUpdate();
+//    }
+    // Teste
+    public ResultSet inserirMovimentoEstoqueEObterId(String nomeMovimento, String dataMovimento) throws SQLException {
         Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("insert into TiposMovimentos values(?,?,?)");
-        SQL.setInt(1, 0);
-        SQL.setString(2, nomeMovimento);
-        SQL.setString(3, debCred);
+        PreparedStatement SQL = con.prepareStatement("insert into MovimentosEstoque (ID_Movimento, DataMovimento, ID_TipoMovimento)"
+                + " values(?,str_to_date(?,\"%d/%m/%Y %H:%i:%s\"),?)");
+        SQL.setInt(1, obterIdMovimentoEstoque());
+        SQL.setString(2, dataMovimento);
+        SQL.setInt(3, obterIdTipoMovimento(nomeMovimento));
         SQL.executeUpdate();
+        
+        SQL = con.prepareStatement("select max(ID_Movimento) as ID from MovimentosEstoque");
+        ResultSet rs = SQL.executeQuery();
+        if (rs.next()) {
+            return rs;
+        } else {
+            return null;
+        }
     }
+    // Teste
     
     public void inserirMovimentoEstoque(String nomeMovimento, String dataMovimento) throws SQLException {
         Connection con = new ConexaoDAO().conectar();
         PreparedStatement SQL = con.prepareStatement("insert into MovimentosEstoque (ID_Movimento, DataMovimento, ID_TipoMovimento)"
                 + " values(?,str_to_date(?,\"%d/%m/%Y %H:%i:%s\"),?)");
-        SQL.setInt(1, obterIdMovimento()); // TEM QUE FICAR MUDANDO POIS NAO E AUTO INCREMENT
+        SQL.setInt(1, obterIdMovimentoEstoque());
         SQL.setString(2, dataMovimento);
         SQL.setInt(3, obterIdTipoMovimento(nomeMovimento));
         SQL.executeUpdate();
     }
     
-    public void inserirProdutoMovimento(int idProduto, int quantidade) throws SQLException {
+    public void inserirProdutoMovimento(int idProduto, int idMovimento, int quantidade) throws SQLException {
         Connection con = new ConexaoDAO().conectar();
         PreparedStatement SQL = con.prepareStatement("insert into ProdutosMovimentos (ID_ProdutoMovimento, ID_Movimento, ID_Produto, Quantidade)"
                 + " values(?,?,?,?)");       
         SQL.setInt(1, 0);   
-        SQL.setInt(2, (obterIdMovimento()-1)); // SEM O MAX + 1 FUNCIONA. JA COM NAO FUNCIONA 
-                                               // POIS APONTA PARA UMA POSICAO QUE NAO EXISTE 
-                                               // NA OUTRA TABELA (JA QUE NAO E ADICIONADO)
+        SQL.setInt(2, idMovimento);
         SQL.setInt(3, idProduto);
         SQL.setInt(4, quantidade);
         SQL.executeUpdate();
@@ -54,7 +71,7 @@ public class VendasDAO {
     // ------------------------------------------------------------------------------------------------- FIM METODOS DE INSERCAO
     
     // ------------------------------------------------------------------------------------------------- INICIO METODOS DE PESQUISA
-    private int obterIdMovimento() throws SQLException {
+    private int obterIdMovimentoEstoque() throws SQLException {
         Connection con = new ConexaoDAO().conectar();
         PreparedStatement SQL = con.prepareStatement("select max(ID_Movimento) + 1 as ID from MovimentosEstoque");     
         ResultSet rs = SQL.executeQuery();
