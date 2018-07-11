@@ -17,7 +17,7 @@ import java.sql.SQLException;
  * @author Couth
  */
 public class ConexaoDAO {
-    private final String URL = "jdbc:mysql://localhost";
+    private final String URL = "jdbc:mysql://localhost/GLADIOSCEV";
     private final String USUARIO = "root";
     private final String SENHA = "JOAOH123"; 
     
