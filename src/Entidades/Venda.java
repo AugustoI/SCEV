@@ -131,35 +131,35 @@ public class Venda implements GladioError {
 //    private char debitoCredito;
 //    private int idProduto, idMovimento, idTipoMovimento, quantidade;
 //    private float precoVenda;
-    private String nomeMovimento, dataVenda, horaVenda;
+    private String nomeMovimento;//, dataVenda, horaVenda;
     private int idProduto, idMovimento, quantidade;
 
     
     /*
      * Metodo para venda de um novo produto atraves de seu codigo.
      */
-    public void novaVenda(int idProduto, int idMovimento, String nomeMovimento, int quantidade) 
-        throws Exception {
-        SimpleDateFormat formatoData = new SimpleDateFormat("dd/MM/yyyy");
-        SimpleDateFormat formatoHora = new SimpleDateFormat("HH:mm:ss");
-        Date date = new Date();
-        String dataFormatada = formatoData.format(date);
-        String horaFormatada = formatoHora.format(date);
-        novaVenda(idProduto, idMovimento, nomeMovimento, dataFormatada, horaFormatada, quantidade);
-    }
+//    public void novaVenda(int idProduto, int idMovimento, String nomeMovimento, int quantidade) 
+//        throws Exception {
+//        SimpleDateFormat formatoData = new SimpleDateFormat("dd/MM/yyyy");
+//        SimpleDateFormat formatoHora = new SimpleDateFormat("HH:mm:ss");
+//        Date date = new Date();
+//        String dataFormatada = formatoData.format(date);
+//        String horaFormatada = formatoHora.format(date);
+//        novaVenda(idProduto, idMovimento, nomeMovimento, quantidade);//dataFormatada, horaFormatada, quantidade);
+//    }
     
     
     /*
      * Metodo para venda de um novo produto atraves de seu codigo.
      */
-    public void novaVenda(int idProduto, int idMovimento, String nomeMovimento, 
-        String dataVenda, String horaVenda, int quantidade) throws Exception {
+    public void novaVenda(int idProduto, int idMovimento, int quantidade) throws Exception {//String nomeMovimento, 
+        //String dataVenda, String horaVenda, int quantidade) throws Exception {
         
         setIdProduto(idProduto);
         setIdMovimento(idMovimento);
-        setNomeMovimento(nomeMovimento);
-        setDataVenda(dataVenda);
-        setHoraVenda(horaVenda);
+        //setNomeMovimento(nomeMovimento);
+        //setDataVenda(dataVenda);
+        //setHoraVenda(horaVenda);
         setQuantidade(quantidade);
         
         confereParametrosNovaVenda();
@@ -210,17 +210,17 @@ public class Venda implements GladioError {
                       getNomeMovimento().equalsIgnoreCase("COMPRA"))) {
                     setCodError(3);
                 } else {
-                    if (!eDataValida(getDataVenda())) {
-                        setCodError(4);
-                    } else {
-                        if (!eHoraValida(getHoraVenda())) {
-                            setCodError(5);
-                        } else {
+//                    if (!eDataValida(getDataVenda())) {
+//                        setCodError(4);
+//                    } else {
+//                        if (!eHoraValida(getHoraVenda())) {
+//                            setCodError(5);
+//                        } else {
                             if (getQuantidade() < 0) {
                                 setCodError(6);
                             }
-                        }
-                    }
+//                        }
+//                    }
                 }
             }
         }
@@ -234,40 +234,40 @@ public class Venda implements GladioError {
      * @return true  -> data valida.
      *         false -> data invalida.
      */
-    public boolean eDataValida(String data) {
-        boolean r = true;
-        int tamanho = data.length();
-        if (tamanho == 10) {
-            int i = 0;
-            // testar se o formato da data e valido
-            while (i < tamanho && r) {
-                if (i == 2 || i == 5) {
-                    if (data.charAt(i) != '/') {
-                        r = false;
-                    }
-                } else {
-                    if (data.charAt(i) < '0' ||
-                        data.charAt(i) > '9') {
-                        r = false;
-                    }
-                }
-                i = i + 1;
-            }
-            
-            if (r) {
-                try {
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                    sdf.setLenient(false);
-                    sdf.parse(data);
-                } catch (ParseException pe) {
-                    r = false;
-                }
-            }
-        } else {
-            r = false;
-        }
-        return r;
-    }
+//    public boolean eDataValida(String data) {
+//        boolean r = true;
+//        int tamanho = data.length();
+//        if (tamanho == 10) {
+//            int i = 0;
+//            // testar se o formato da data e valido
+//            while (i < tamanho && r) {
+//                if (i == 2 || i == 5) {
+//                    if (data.charAt(i) != '/') {
+//                        r = false;
+//                    }
+//                } else {
+//                    if (data.charAt(i) < '0' ||
+//                        data.charAt(i) > '9') {
+//                        r = false;
+//                    }
+//                }
+//                i = i + 1;
+//            }
+//            
+//            if (r) {
+//                try {
+//                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+//                    sdf.setLenient(false);
+//                    sdf.parse(data);
+//                } catch (ParseException pe) {
+//                    r = false;
+//                }
+//            }
+//        } else {
+//            r = false;
+//        }
+//        return r;
+//    }
     
     /**
      * Metodo para conferir se uma hora e valida.
@@ -277,40 +277,40 @@ public class Venda implements GladioError {
      * @return true  -> hora valida.
      *         false -> hora invalida.
      */
-    public boolean eHoraValida(String hora) {
-        boolean r = true;
-        int tamanho = hora.length();
-        if (tamanho == 8) {
-            int i = 0;
-            // testar se o formato da data e valido
-            while (i < tamanho && r) {
-                if (i == 2 || i == 5) {
-                    if (hora.charAt(i) != ':') {
-                        r = false;
-                    }
-                } else {
-                    if (hora.charAt(i) < '0' ||
-                        hora.charAt(i) > '9') {
-                        r = false;
-                    }
-                }
-                i = i + 1;
-            }
-            
-            if (r) {
-                try {
-                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-                    sdf.setLenient(false);
-                    sdf.parse(hora);
-                } catch (ParseException pe) {
-                    r = false;
-                }
-            }
-        } else {
-            r = false;
-        }
-        return r;
-    }
+//    public boolean eHoraValida(String hora) {
+//        boolean r = true;
+//        int tamanho = hora.length();
+//        if (tamanho == 8) {
+//            int i = 0;
+//            // testar se o formato da data e valido
+//            while (i < tamanho && r) {
+//                if (i == 2 || i == 5) {
+//                    if (hora.charAt(i) != ':') {
+//                        r = false;
+//                    }
+//                } else {
+//                    if (hora.charAt(i) < '0' ||
+//                        hora.charAt(i) > '9') {
+//                        r = false;
+//                    }
+//                }
+//                i = i + 1;
+//            }
+//            
+//            if (r) {
+//                try {
+//                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+//                    sdf.setLenient(false);
+//                    sdf.parse(hora);
+//                } catch (ParseException pe) {
+//                    r = false;
+//                }
+//            }
+//        } else {
+//            r = false;
+//        }
+//        return r;
+//    }
     // ------------------------------------------------------------------------------------------------- INICIO AUXILIARES CLASSE VENDA
     
     // ------------------------------------------------------------------------------------------------- INICIO SET|GET CLASSE VENDA
@@ -322,21 +322,21 @@ public class Venda implements GladioError {
         this.nomeMovimento = nomeMovimento;
     }
 
-    public String getDataVenda() {
-        return dataVenda;
-    }
-
-    public void setDataVenda(String dataVenda) {
-        this.dataVenda = dataVenda;
-    }
-
-    public String getHoraVenda() {
-        return horaVenda;
-    }
-
-    public void setHoraVenda(String horaVenda) {
-        this.horaVenda = horaVenda;
-    }
+//    public String getDataVenda() {
+//        return dataVenda;
+//    }
+//
+//    public void setDataVenda(String dataVenda) {
+//        this.dataVenda = dataVenda;
+//    }
+//
+//    public String getHoraVenda() {
+//        return horaVenda;
+//    }
+//
+//    public void setHoraVenda(String horaVenda) {
+//        this.horaVenda = horaVenda;
+//    }
 
     public int getIdProduto() {
         return idProduto;
