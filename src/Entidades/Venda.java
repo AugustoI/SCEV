@@ -10,10 +10,8 @@ package Entidades;
 
 import DAO.VendasDAO;
 import Interface.GladioError;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  *
@@ -34,10 +32,11 @@ public class Venda implements GladioError {
      * 07 -> QUANTIDADE DE COMPRA MAIOR QUE A QUANTIDADE DISPONIVEL NO ESTOQUE.
      * 08 -> O ESTOQUE DESTE PRODUTO ESTA VAZIO.
      * 09 -> ERRO SQL.
-    
-     * 12 -> PARAMETRO 'confereParametrosNovaVenda' INVALIDO.
-     * 14 -> ERRO NA PESQUISA DE QUANTIDADE DISPONIVEL NO ESTOQUE.
-     * 15 -> ERRO SQLEXCEPTION EM VENDAS.
+     * 10 -> ERRO NA PESQUISA DO PRODUTOS MOVIMENTO.
+     * 11 -> ERRO NA PESQUISA DO PRODUTOS MOVIMENTO PELO ID DO PRODUTOMOVIMENTO.
+     * 12 -> ERRO NA PESQUISA DO PRODUTOS MOVIMENTO PELO ID DO MOVIMENTO.
+     * 13 -> ERRO NA PESQUISA DO PRODUTOS MOVIMENTO PELO ID DO PRODUTO.
+     * 14 -> ERRO NA PESQUISA DO PRODUTOS MOVIMENTO PELA QUANTIDADE.
      */
     private int codError = 0;
     
@@ -92,7 +91,7 @@ public class Venda implements GladioError {
                 msg = prefix+"Não há erros.";
                 break;
             case 1:
-                msg = prefix+"Erro no código(id) do produto.";
+                msg = prefix+"Erro no id do produto.";
                 break;
             case 2:
                 msg = prefix+"Erro no id do movimento.";
@@ -127,42 +126,19 @@ public class Venda implements GladioError {
     // ------------------------------------------------------------------------------------------------- FIM INTERFACE GLADIOERROR
     
     // ------------------------------------------------------------------------------------------------- INICIO CLASSE VENDA
-//    private String nomeProduto, nomeMovimento, dataVenda, descricao, unidade;
-//    private char debitoCredito;
-//    private int idProduto, idMovimento, idTipoMovimento, quantidade;
-//    private float precoVenda;
-    private String nomeMovimento;//, dataVenda, horaVenda;
+    private String nomeMovimento;
     private int idProduto, idMovimento, quantidade;
-
     
     /*
      * Metodo para venda de um novo produto atraves de seu codigo.
      */
-//    public void novaVenda(int idProduto, int idMovimento, String nomeMovimento, int quantidade) 
-//        throws Exception {
-//        SimpleDateFormat formatoData = new SimpleDateFormat("dd/MM/yyyy");
-//        SimpleDateFormat formatoHora = new SimpleDateFormat("HH:mm:ss");
-//        Date date = new Date();
-//        String dataFormatada = formatoData.format(date);
-//        String horaFormatada = formatoHora.format(date);
-//        novaVenda(idProduto, idMovimento, nomeMovimento, quantidade);//dataFormatada, horaFormatada, quantidade);
-//    }
-    
-    
-    /*
-     * Metodo para venda de um novo produto atraves de seu codigo.
-     */
-    public void novaVenda(int idProduto, int idMovimento, int quantidade) throws Exception {//String nomeMovimento, 
-        //String dataVenda, String horaVenda, int quantidade) throws Exception {
+    public void novoProdutoMovimento(int idProduto, int idMovimento, int quantidade) throws Exception {
         
         setIdProduto(idProduto);
         setIdMovimento(idMovimento);
-        //setNomeMovimento(nomeMovimento);
-        //setDataVenda(dataVenda);
-        //setHoraVenda(horaVenda);
         setQuantidade(quantidade);
         
-        confereParametrosNovaVenda();
+        confereParametrosNovoProdutoMovimento();
         
         if (hasError()) {
             throw new Exception(msgError());
@@ -172,13 +148,7 @@ public class Venda implements GladioError {
                 int quantidadeEstoque = vDAO.obterQuantidadeProdutosDisponiveis(getIdProduto());
                 if (quantidadeEstoque >= 0) {
                     if (quantidade <= quantidadeEstoque) {
-                        //ResultSet rs = vDAO.inserirMovimentoEstoqueEObterId(getNomeMovimento(), getDataVenda());
-                        //if (rs == null) {
-                            //setCodError(2);
-                            //throw new Exception(msgError());
-                        //} else {
                         vDAO.inserirProdutoMovimento(getIdProduto(), getIdMovimento(), getQuantidade());
-                        //}
                     } else {
                         setCodError(6);
                         throw new Exception(msgError());
@@ -194,11 +164,126 @@ public class Venda implements GladioError {
         }
     }
     
+    /*
+     * Metodo para pesquisar todos os produtos movimentos.
+     */
+    public ResultSet pesquisaProdutoMovimento() throws Exception {
+        ResultSet rs;
+        try {
+            VendasDAO vDAO = new VendasDAO();
+            rs = vDAO.pesquisarProdutoMovimento();
+            if (rs == null) {
+                setCodError(10);
+                throw new Exception(msgError());
+            }
+        } catch (SQLException sqlE) {
+            setCodError(8);
+            throw new Exception(msgError()+" "+sqlE);
+        }
+        return rs;
+    }
+    
+    /*
+     * Metodo para pesquisar todos os produtos movimentos pelo id do produto movimento.
+     */
+    public ResultSet pesquisaProdutoMovimento(int idProdutoMovimento) throws Exception {
+        if (idProdutoMovimento >= 0) {
+            ResultSet rs;
+            try {
+                VendasDAO vDAO = new VendasDAO();
+                rs = vDAO.pesquisarProdutoMovimento(idProdutoMovimento);
+                if (rs == null) {
+                    setCodError(11);
+                    throw new Exception(msgError());
+                }
+            } catch (SQLException sqlE) {
+                setCodError(8);
+                throw new Exception(msgError()+" "+sqlE);
+            }
+            return rs;
+        } else {
+            setCodError(11);
+            throw new Exception(msgError());
+        }
+    }
+    
+    /*
+     * Metodo para pesquisar todos os produtos movimentos pelo id do movimento.
+     */
+    public ResultSet pesquisaProdutoMovimentoPeloIdMovimento(int idMovimento) throws Exception {
+        if (idMovimento >= 0) {
+            ResultSet rs;
+            try {
+                VendasDAO vDAO = new VendasDAO();
+                rs = vDAO.pesquisarProdutoMovimento(idMovimento);
+                if (rs == null) {
+                    setCodError(12);
+                    throw new Exception(msgError());
+                }
+            } catch (SQLException sqlE) {
+                setCodError(8);
+                throw new Exception(msgError()+" "+sqlE);
+            }
+            return rs;
+        } else {
+            setCodError(12);
+            throw new Exception(msgError());
+        }
+    }
+    
+    /*
+     * Metodo para pesquisar todos os produtos movimentos pelo id do produto.
+     */
+    public ResultSet pesquisaProdutoMovimentoPeloIdProduto(int idProduto) throws Exception {
+        if (idProduto  >= 0) {
+            ResultSet rs;
+            try {
+                VendasDAO vDAO = new VendasDAO();
+                rs = vDAO.pesquisarProdutoMovimento(idProduto);
+                if (rs == null) {
+                    setCodError(13);
+                    throw new Exception(msgError());
+                }
+            } catch (SQLException sqlE) {
+                setCodError(8);
+                throw new Exception(msgError()+" "+sqlE);
+            }
+            return rs;
+        } else {
+            setCodError(13);
+            throw new Exception(msgError());
+        }
+    }
+    
+    /*
+     * Metodo para pesquisar todos os produtos movimentos pela quantidade.
+     */
+    public ResultSet pesquisaProdutoMovimentoPelaQuantidade(int quantidade) throws Exception {
+        if (quantidade > 0) {
+            ResultSet rs;
+            try {
+                VendasDAO vDAO = new VendasDAO();
+                rs = vDAO.pesquisarProdutoMovimento(quantidade);
+                if (rs == null) {
+                    setCodError(14);
+                    throw new Exception(msgError());
+                }
+            } catch (SQLException sqlE) {
+                setCodError(8);
+                throw new Exception(msgError()+" "+sqlE);
+            }
+            return rs;
+        } else {
+            setCodError(14);
+            throw new Exception(msgError());
+        }
+    }
+    
     // ------------------------------------------------------------------------------------------------- INICIO AUXILIARES CLASSE VENDA    
     /**
      * Metodo para conferir se os parametros da venda sao validos.
      */
-    public void confereParametrosNovaVenda() {
+    public void confereParametrosNovoProdutoMovimento() {
         if (getIdProduto() < 0) {
             setCodError(1);
         } else {
@@ -210,107 +295,13 @@ public class Venda implements GladioError {
                       getNomeMovimento().equalsIgnoreCase("COMPRA"))) {
                     setCodError(3);
                 } else {
-//                    if (!eDataValida(getDataVenda())) {
-//                        setCodError(4);
-//                    } else {
-//                        if (!eHoraValida(getHoraVenda())) {
-//                            setCodError(5);
-//                        } else {
-                            if (getQuantidade() < 0) {
-                                setCodError(6);
-                            }
-//                        }
-//                    }
+                    if (getQuantidade() < 0) {
+                        setCodError(6);
+                    }
                 }
             }
         }
     }
-    
-    /**
-     * Metodo para conferir se uma data e valida.
-     * 
-     * @param data - data a ser verificada.
-     * 
-     * @return true  -> data valida.
-     *         false -> data invalida.
-     */
-//    public boolean eDataValida(String data) {
-//        boolean r = true;
-//        int tamanho = data.length();
-//        if (tamanho == 10) {
-//            int i = 0;
-//            // testar se o formato da data e valido
-//            while (i < tamanho && r) {
-//                if (i == 2 || i == 5) {
-//                    if (data.charAt(i) != '/') {
-//                        r = false;
-//                    }
-//                } else {
-//                    if (data.charAt(i) < '0' ||
-//                        data.charAt(i) > '9') {
-//                        r = false;
-//                    }
-//                }
-//                i = i + 1;
-//            }
-//            
-//            if (r) {
-//                try {
-//                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-//                    sdf.setLenient(false);
-//                    sdf.parse(data);
-//                } catch (ParseException pe) {
-//                    r = false;
-//                }
-//            }
-//        } else {
-//            r = false;
-//        }
-//        return r;
-//    }
-    
-    /**
-     * Metodo para conferir se uma hora e valida.
-     * 
-     * @param hora - hora a ser verificada.
-     * 
-     * @return true  -> hora valida.
-     *         false -> hora invalida.
-     */
-//    public boolean eHoraValida(String hora) {
-//        boolean r = true;
-//        int tamanho = hora.length();
-//        if (tamanho == 8) {
-//            int i = 0;
-//            // testar se o formato da data e valido
-//            while (i < tamanho && r) {
-//                if (i == 2 || i == 5) {
-//                    if (hora.charAt(i) != ':') {
-//                        r = false;
-//                    }
-//                } else {
-//                    if (hora.charAt(i) < '0' ||
-//                        hora.charAt(i) > '9') {
-//                        r = false;
-//                    }
-//                }
-//                i = i + 1;
-//            }
-//            
-//            if (r) {
-//                try {
-//                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-//                    sdf.setLenient(false);
-//                    sdf.parse(hora);
-//                } catch (ParseException pe) {
-//                    r = false;
-//                }
-//            }
-//        } else {
-//            r = false;
-//        }
-//        return r;
-//    }
     // ------------------------------------------------------------------------------------------------- INICIO AUXILIARES CLASSE VENDA
     
     // ------------------------------------------------------------------------------------------------- INICIO SET|GET CLASSE VENDA
@@ -321,22 +312,6 @@ public class Venda implements GladioError {
     public void setNomeMovimento(String nomeMovimento) {
         this.nomeMovimento = nomeMovimento;
     }
-
-//    public String getDataVenda() {
-//        return dataVenda;
-//    }
-//
-//    public void setDataVenda(String dataVenda) {
-//        this.dataVenda = dataVenda;
-//    }
-//
-//    public String getHoraVenda() {
-//        return horaVenda;
-//    }
-//
-//    public void setHoraVenda(String horaVenda) {
-//        this.horaVenda = horaVenda;
-//    }
 
     public int getIdProduto() {
         return idProduto;
