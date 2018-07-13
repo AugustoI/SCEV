@@ -19,45 +19,7 @@ import java.sql.SQLException;
  */
 public class VendasDAO {
     // -------------------------------------------------------------------------------------------------------- INICIO METODOS DE INSERCAO|PESQUISA PELO ID_PRODUTO
-    // ------------------------------------------------------------------------------------------------- INICIO METODOS DE INSERCAO
-//    public void inserirTipoMovimento(String nomeMovimento, String debCred) throws SQLException {;
-//        Connection con = new ConexaoDAO().conectar();
-//        PreparedStatement SQL = con.prepareStatement("insert into TiposMovimentos values(?,?,?)");
-//        SQL.setInt(1, 0);
-//        SQL.setString(2, nomeMovimento);
-//        SQL.setString(3, debCred);
-//        SQL.executeUpdate();
-//    }
-    // Teste
-    public ResultSet inserirMovimentoEstoqueEObterId(String nomeMovimento, String dataMovimento) throws SQLException {
-        Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("insert into MovimentosEstoque (ID_Movimento, DataMovimento, ID_TipoMovimento)"
-                + " values(?,str_to_date(?,\"%d/%m/%Y %H:%i:%s\"),?)");
-        SQL.setInt(1, obterIdMovimentoEstoque());
-        SQL.setString(2, dataMovimento);
-        SQL.setInt(3, obterIdTipoMovimento(nomeMovimento));
-        SQL.executeUpdate();
-        
-        SQL = con.prepareStatement("select max(ID_Movimento) as ID from MovimentosEstoque");
-        ResultSet rs = SQL.executeQuery();
-        if (rs.next()) {
-            return rs;
-        } else {
-            return null;
-        }
-    }
-    // Teste
-    
-    public void inserirMovimentoEstoque(String nomeMovimento, String dataMovimento) throws SQLException {
-        Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("insert into MovimentosEstoque (ID_Movimento, DataMovimento, ID_TipoMovimento)"
-                + " values(?,str_to_date(?,\"%d/%m/%Y %H:%i:%s\"),?)");
-        SQL.setInt(1, obterIdMovimentoEstoque());
-        SQL.setString(2, dataMovimento);
-        SQL.setInt(3, obterIdTipoMovimento(nomeMovimento));
-        SQL.executeUpdate();
-    }
-    
+    // ------------------------------------------------------------------------------------------------- INICIO METODOS DE INSERCAO    
     public void inserirProdutoMovimento(int idProduto, int idMovimento, int quantidade) throws SQLException {
         Connection con = new ConexaoDAO().conectar();
         PreparedStatement SQL = con.prepareStatement("insert into ProdutosMovimentos (ID_ProdutoMovimento, ID_Movimento, ID_Produto, Quantidade)"
@@ -71,26 +33,62 @@ public class VendasDAO {
     // ------------------------------------------------------------------------------------------------- FIM METODOS DE INSERCAO
     
     // ------------------------------------------------------------------------------------------------- INICIO METODOS DE PESQUISA
-    private int obterIdMovimentoEstoque() throws SQLException {
+    public ResultSet pesquisarProdutoMovimento() throws SQLException {
         Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("select max(ID_Movimento) + 1 as ID from MovimentosEstoque");     
+        PreparedStatement SQL = con.prepareStatement("select * from ProdutosMovimentos");     
         ResultSet rs = SQL.executeQuery();
         if (rs.next()) {
-            return rs.getInt(1);
+            return rs;
         } else {
-            return -1;
+            return null;
         }
     }
     
-    private int obterIdTipoMovimento(String nomeMovimento) throws SQLException {
+    public ResultSet pesquisarProdutoMovimento(int idProdutoMovimento) throws SQLException {
         Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("select ID_TipoMovimento as ID from tiposmovimentos where NomeMovimento = ?");  
-        SQL.setString(1, nomeMovimento);
+        PreparedStatement SQL = con.prepareStatement("select * from ProdutosMovimentos where ID_ProdutoMovimento=?");     
+        SQL.setInt(1, idProdutoMovimento);
         ResultSet rs = SQL.executeQuery();
         if (rs.next()) {
-            return rs.getInt(1);
+            return rs;
         } else {
-            return -1;
+            return null;
+        }
+    }
+    
+    public ResultSet pesquisarProdutoMovimentoPeloIdMovimento(int idMovimento) throws SQLException {
+        Connection con = new ConexaoDAO().conectar();
+        PreparedStatement SQL = con.prepareStatement("select * from ProdutosMovimentos where ID_Movimento=?");     
+        SQL.setInt(1, idMovimento);
+        ResultSet rs = SQL.executeQuery();
+        if (rs.next()) {
+            return rs;
+        } else {
+            return null;
+        }
+    }
+    
+    public ResultSet pesquisarProdutoMovimentoPeloIdProduto(int idProduto) throws SQLException {
+        Connection con = new ConexaoDAO().conectar();
+        PreparedStatement SQL = con.prepareStatement("select * from ProdutosMovimentos where ID_Produto=?");     
+        SQL.setInt(1, idProduto);
+        ResultSet rs = SQL.executeQuery();
+        if (rs.next()) {
+            return rs;
+        } else {
+            return null;
+        }
+    }
+    
+    public ResultSet pesquisarProdutoMovimentoPelaQuantidade(int quantidade) throws SQLException {
+        Connection con = new ConexaoDAO().conectar();
+        PreparedStatement SQL = con.prepareStatement("select * from ProdutosMovimentos where Quantidade=?");     
+        SQL.setInt(1, quantidade);
+        ResultSet rs = SQL.executeQuery();
+        if (rs.next()) {
+            return rs;
+        } else {
+            return null;
         }
     }
     
