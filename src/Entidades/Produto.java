@@ -1,6 +1,7 @@
 package Entidades;
 
 import DAO.ConexaoDAO;
+import java.awt.HeadlessException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,12 +24,12 @@ public class Produto {
     private double Custo;
     private double Preco;
     
-    public void BuscarProduto(int ID){
+    public void BuscarProduto(){
         Connection con;
         try {
             con = new ConexaoDAO().conectar();
             PreparedStatement sqlBusca = con.prepareStatement("SELECT * FROM Produtos WHERE ID_Produto = ?"); 
-            sqlBusca.setInt(1, ID);
+            sqlBusca.setInt(1, this.getID_Produto());
             try (ResultSet rsSelect = sqlBusca.executeQuery()) {
                 setID_Produto(rsSelect.getInt("ID_Produto"));
                 setNomeProduto(rsSelect.getString("NomeProduto"));
@@ -111,6 +112,33 @@ public class Produto {
                         ,JOptionPane.ERROR_MESSAGE);
         }
         
+    }
+    
+    public void DeletarProduto (){
+        Connection con;
+        try {
+            con = new ConexaoDAO().conectar();
+            PreparedStatement sqlConsistencia = con.prepareStatement("select isnull(count(1),0) from ProdutosMovimento ID_Produto = ?");
+            sqlConsistencia.setInt(1, this.getID_Produto());
+            ResultSet rsConsistencia = sqlConsistencia.executeQuery();
+            
+            if (rsConsistencia.getInt(1) > 0){
+                JOptionPane.showMessageDialog(null, "Existem lançamentos realizados com esse produto. Não é foi possível deletar!"
+                        , "Erro", JOptionPane.ERROR_MESSAGE);
+            }else{
+                PreparedStatement sqlDelete = con.prepareStatement("delete from ProdutosMovimento where ID_Produto = ?");
+                sqlDelete.setInt(1, this.getID_Produto());
+                int i = sqlDelete.executeUpdate();
+                JOptionPane.showMessageDialog(null, "O produto foi deletado com sucesso!"
+                        , "Deletar", JOptionPane.INFORMATION_MESSAGE);
+            }
+            rsConsistencia.close();            
+            
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage()
+                        ,"Erro inesperado ao tentar deletar produto - Comunique a Gládio - " + ex.getMessage() 
+                        ,JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     public int getID_Produto() {

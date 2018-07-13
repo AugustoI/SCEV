@@ -19,37 +19,58 @@ import java.sql.SQLException;
  */
 public class VendasDAO {
     // -------------------------------------------------------------------------------------------------------- INICIO METODOS DE INSERCAO|PESQUISA PELO ID_PRODUTO
-    // ------------------------------------------------------------------------------------------------- INICIO METODOS DE INSERCAO
-    public void inserirTipoMovimento(String nomeMovimento, String debCred) throws SQLException {
+    // ------------------------------------------------------------------------------------------------- INICIO METODOS DE INSERCAO    
+    public void inserirProdutoMovimento(int idProduto, int idMovimento, int quantidade) throws SQLException {
         Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("insert into tipoMovimentos values(0,?,?)"); 
-        SQL.setString(1, nomeMovimento);
-        SQL.setString(2, debCred);
-        SQL.executeUpdate();
-    }
-    
-    public void inserirMovimentoEstoque(int idTipoMovimento, String dataMovimento) throws SQLException {
-        Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("insert into movimentosEstoque values(0,?,?)");
-        SQL.setInt(1, idTipoMovimento);
-        SQL.setString(2, dataMovimento);
-        SQL.executeUpdate();
-    }
-    
-    public void inserirProdutoMovimento(int idMovimento, int idProduto, int quantidade) throws SQLException {
-        Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("insert into produtosMovimento values(0,?,?,?)");        
-        SQL.setInt(1, idMovimento);
-        SQL.setInt(2, idProduto);
-        SQL.setInt(3, quantidade);
+        PreparedStatement SQL = con.prepareStatement("insert into ProdutosMovimentos (ID_ProdutoMovimento, ID_Movimento, ID_Produto, Quantidade)"
+                + " values(?,?,?,?)");       
+        SQL.setInt(1, 0);   
+        SQL.setInt(2, idMovimento);
+        SQL.setInt(3, idProduto);
+        SQL.setInt(4, quantidade);
         SQL.executeUpdate();
     }
     // ------------------------------------------------------------------------------------------------- FIM METODOS DE INSERCAO
     
     // ------------------------------------------------------------------------------------------------- INICIO METODOS DE PESQUISA
-    public ResultSet obterIdTipoMovimento(int idProduto) throws SQLException {
+    public ResultSet pesquisarProdutoMovimento() throws SQLException {
         Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("select idTipoMovimento from movimentosEstoque where idProduto=?");        
+        PreparedStatement SQL = con.prepareStatement("select * from ProdutosMovimentos");     
+        ResultSet rs = SQL.executeQuery();
+        if (rs.next()) {
+            return rs;
+        } else {
+            return null;
+        }
+    }
+    
+    public ResultSet pesquisarProdutoMovimento(int idProdutoMovimento) throws SQLException {
+        Connection con = new ConexaoDAO().conectar();
+        PreparedStatement SQL = con.prepareStatement("select * from ProdutosMovimentos where ID_ProdutoMovimento=?");     
+        SQL.setInt(1, idProdutoMovimento);
+        ResultSet rs = SQL.executeQuery();
+        if (rs.next()) {
+            return rs;
+        } else {
+            return null;
+        }
+    }
+    
+    public ResultSet pesquisarProdutoMovimentoPeloIdMovimento(int idMovimento) throws SQLException {
+        Connection con = new ConexaoDAO().conectar();
+        PreparedStatement SQL = con.prepareStatement("select * from ProdutosMovimentos where ID_Movimento=?");     
+        SQL.setInt(1, idMovimento);
+        ResultSet rs = SQL.executeQuery();
+        if (rs.next()) {
+            return rs;
+        } else {
+            return null;
+        }
+    }
+    
+    public ResultSet pesquisarProdutoMovimentoPeloIdProduto(int idProduto) throws SQLException {
+        Connection con = new ConexaoDAO().conectar();
+        PreparedStatement SQL = con.prepareStatement("select * from ProdutosMovimentos where ID_Produto=?");     
         SQL.setInt(1, idProduto);
         ResultSet rs = SQL.executeQuery();
         if (rs.next()) {
@@ -59,10 +80,10 @@ public class VendasDAO {
         }
     }
     
-    public ResultSet obterIdMovimento(int idProduto) throws SQLException {
+    public ResultSet pesquisarProdutoMovimentoPelaQuantidade(int quantidade) throws SQLException {
         Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("select idMovimento from movimentosEstoque where idProduto=?");     
-        SQL.setInt(1, idProduto);
+        PreparedStatement SQL = con.prepareStatement("select * from ProdutosMovimentos where Quantidade=?");     
+        SQL.setInt(1, quantidade);
         ResultSet rs = SQL.executeQuery();
         if (rs.next()) {
             return rs;
@@ -71,15 +92,15 @@ public class VendasDAO {
         }
     }
     
-    public ResultSet obterQuantidadeProdutosDisponiveis(int idProduto) throws SQLException {
+    public int obterQuantidadeProdutosDisponiveis(int idProduto) throws SQLException {
         Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("select quantidade from produtos where idProduto=?");        
+        PreparedStatement SQL = con.prepareStatement("select Quantidade from produtos where ID_PRODUTO=?");        
         SQL.setInt(1, idProduto);
         ResultSet rs = SQL.executeQuery();
         if (rs.next()) {
-            return rs;
+            return rs.getInt(1);
         } else {
-            return null;
+            return -1;
         }
     }
     // ------------------------------------------------------------------------------------------------- FIM METODOS DE PESQUISA
