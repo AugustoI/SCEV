@@ -28,15 +28,16 @@ public class Movimentos implements GladioError {
      * 00 -> NAO HA ERRO.
      * 01 -> ERRO NO ID DO MOVIMENTO.
      * 02 -> ERRO NO ID DO TIPO DE MOVIMENTO.
-     * 03 -> ERRO NA DATA DO MOVIMENTO.
-     * 04 -> ERRO NA HORA DO MOVIMENTO.
-     * 05 -> ERRO NO NOME DO MOVIMENTO.
-     * 06 -> ERRO SQL.
-     * 07 -> ERRO NA INSERCAO DO MOVIMENTOS ESTOQUE.
-     * 08 -> ERRO NA PESQUISA DOS MOVIMENTOS ESTOQUE.
-     * 09 -> ERRO NA PESQUISA DO MOVIMENTOS ESTOQUE PELO ID DO MOVIMENTO.
-     * 10 -> ERRO NA PESQUISA DO MOVIMENTOS ESTOQUE PELO ID DO TIPO DE MOVIMENTO.
-     * 11 -> ERRO NA PESQUISA DO MOVIMENTOS ESTOQUE PELA DATA DO MOVIMENTO.
+     * 03 -> ERRO NO ID DO VARIANTE.
+     * 04 -> ERRO NA DATA DO MOVIMENTO.
+     * 05 -> ERRO NA HORA DO MOVIMENTO.
+     * 06 -> ERRO NO NOME DO MOVIMENTO.
+     * 07 -> ERRO SQL.
+     * 08 -> ERRO NA INSERCAO DO MOVIMENTOS ESTOQUE.
+     * 09 -> ERRO NA PESQUISA DOS MOVIMENTOS ESTOQUE.
+     * 10 -> ERRO NA PESQUISA DO MOVIMENTOS ESTOQUE PELO ID DO MOVIMENTO.
+     * 11 -> ERRO NA PESQUISA DO MOVIMENTOS ESTOQUE PELO ID DO TIPO DE MOVIMENTO.
+     * 12 -> ERRO NA PESQUISA DO MOVIMENTOS ESTOQUE PELA DATA DO MOVIMENTO.
      */
     private int codError = 0;
     
@@ -97,30 +98,33 @@ public class Movimentos implements GladioError {
                 msg = prefix+"Erro no id do tipo de movimento.";
                 break;
             case 3:
-                msg = prefix+"Erro na data do movimento.";
+                msg = prefix+"Erro no id do variante.";
                 break;
             case 4:
-                msg = prefix+"Erro na hora do movimento.";
+                msg = prefix+"Erro na data do movimento.";
                 break;
             case 5:
-                msg = prefix+"Erro no nome do movimento.";
+                msg = prefix+"Erro na hora do movimento.";
                 break;
             case 6:
-                msg = prefix+"Erro SQL: ";
+                msg = prefix+"Erro no nome do movimento.";
                 break;
             case 7:
-                msg = prefix+"Erro na inserção do movimentos estoque.";
+                msg = prefix+"Erro SQL: ";
                 break;
             case 8:
-                msg = prefix+"Erro na pesquisa dos movimentos estoque.";
+                msg = prefix+"Erro na inserção do movimentos estoque.";
                 break;
             case 9:
-                msg = prefix+"Erro na pesquisa dos movimentos estoque pelo id do movimento.";
+                msg = prefix+"Erro na pesquisa dos movimentos estoque.";
                 break;
             case 10:
-                msg = prefix+"Erro na pesquisa dos movimentos estoque pelo id do tipo de movimento.";
+                msg = prefix+"Erro na pesquisa dos movimentos estoque pelo id do movimento.";
                 break;
             case 11:
+                msg = prefix+"Erro na pesquisa dos movimentos estoque pelo id do tipo de movimento.";
+                break;
+            case 12:
                 msg = prefix+"Erro na pesquisa dos movimentos estoque pela data do movimento.";
                 break;
             default:
@@ -132,31 +136,33 @@ public class Movimentos implements GladioError {
     // ------------------------------------------------------------------------------------------------- FIM INTERFACE GLADIOERROR
     
     // ------------------------------------------------------------------------------------------------- INICIO CLASSE VENDA
-    private int idMovimento, idTipoMovimento;
+    private int idMovimento, idTipoMovimento, idVariante;
     private String dataMovimento, horaMovimento, nomeMovimento;
     
     /*
      * Metodo para movimentar um novo estoque sem passar a data atual.
      * Obs.: a data é gerada pela data atual do computador.
      */
-    public void novoMovimentoEstoqueEObterId(int idMovimento, int idTipoMovimento, 
+    public void novoMovimentoEstoqueEObterId(int idMovimento, int idTipoMovimento, int idVariante,
             String nomeMovimento) throws Exception {
         SimpleDateFormat formatoData = new SimpleDateFormat("dd/MM/yyyy");
         SimpleDateFormat formatoHora = new SimpleDateFormat("HH:mm:ss");
         Date date = new Date();
         String dataFormatada = formatoData.format(date);
         String horaFormatada = formatoHora.format(date);
-        novoMovimentoEstoqueEObterId(idMovimento, idTipoMovimento, dataFormatada, horaFormatada, nomeMovimento);
+        novoMovimentoEstoqueEObterId(idMovimento, idTipoMovimento, idVariante,
+                                     dataFormatada, horaFormatada, nomeMovimento);
     }
     
     /*
      * Metodo para movimentar um novo estoque.
      */
-    public int novoMovimentoEstoqueEObterId(int idMovimento, int idTipoMovimento, String dataMovimento, 
-            String horaMovimento, String nomeMovimento) throws Exception {
+    public int novoMovimentoEstoqueEObterId(int idMovimento, int idTipoMovimento, int idVariante,
+            String dataMovimento, String horaMovimento, String nomeMovimento) throws Exception {
         
         setIdMovimento(idMovimento);
         setIdTipoMovimento(idMovimento);
+        setIdVariante(idVariante);
         setDataMovimento(dataMovimento);
         setNomeMovimento(nomeMovimento);
         
@@ -168,15 +174,15 @@ public class Movimentos implements GladioError {
             try {
                 MovimentosDAO mDAO = new MovimentosDAO();
                 String dataHora = getDataMovimento()+" "+getHoraMovimento();
-                ResultSet rs = mDAO.inserirMovimentoEstoqueEObterId(getNomeMovimento(), dataHora);
+                ResultSet rs = mDAO.inserirMovimentoEstoqueEObterId(getNomeMovimento(), dataHora, idVariante);
                 if (rs == null) {
-                    setCodError(7);
+                    setCodError(8);
                     throw new Exception(msgError());
                 } else {
                     return rs.getInt(1);
                 } 
             } catch (SQLException sqlE) {
-                setCodError(6);
+                setCodError(7);
                 throw new Exception(msgError()+" "+sqlE);
             }
         }
@@ -191,11 +197,11 @@ public class Movimentos implements GladioError {
             MovimentosDAO mDAO = new MovimentosDAO();
             rs = mDAO.pesquisarMovimentoEstoque();
             if (rs == null) {
-                setCodError(8);
+                setCodError(9);
                 throw new Exception(msgError());
             }
         } catch (SQLException sqlE) {
-            setCodError(6);
+            setCodError(7);
             throw new Exception(msgError()+" "+sqlE);
         }
         return rs;
@@ -211,11 +217,11 @@ public class Movimentos implements GladioError {
                 MovimentosDAO mDAO = new MovimentosDAO();
                 rs = mDAO.pesquisarMovimentoEstoque(idMovimento);
                 if (rs == null) {
-                    setCodError(9);
+                    setCodError(10);
                     throw new Exception(msgError());
                 }
             } catch (SQLException sqlE) {
-                setCodError(6);
+                setCodError(7);
                 throw new Exception(msgError()+" "+sqlE);
             }
             return rs;
@@ -235,16 +241,40 @@ public class Movimentos implements GladioError {
                 MovimentosDAO mDAO = new MovimentosDAO();
                 rs = mDAO.pesquisarMovimentoEstoquePeloTipoMovimento(idTipoMovimento);
                 if (rs == null) {
-                    setCodError(10);
+                    setCodError(11);
                     throw new Exception(msgError());
                 }
             } catch (SQLException sqlE) {
-                setCodError(6);
+                setCodError(7);
                 throw new Exception(msgError()+" "+sqlE);
             }
             return rs;
         } else {
             setCodError(2);
+            throw new Exception(msgError());
+        }
+    }
+    
+    /*
+     * Metodo para pesquisar todos os movimentos do estoque pelo id do variante.
+     */
+    public ResultSet pesquisarMovimentoEstoquePeloIdVariante(int idVariante) throws Exception {
+        if (idVariante >= 0) {
+            ResultSet rs;
+            try {
+                MovimentosDAO mDAO = new MovimentosDAO();
+                rs = mDAO.pesquisarMovimentoEstoquePeloIdVariante(idVariante);
+                if (rs == null) {
+                    setCodError(11);
+                    throw new Exception(msgError());
+                }
+            } catch (SQLException sqlE) {
+                setCodError(7);
+                throw new Exception(msgError()+" "+sqlE);
+            }
+            return rs;
+        } else {
+            setCodError(3);
             throw new Exception(msgError());
         }
     }
@@ -260,20 +290,20 @@ public class Movimentos implements GladioError {
                 MovimentosDAO mDAO = new MovimentosDAO();
                 rs = mDAO.pesquisarMovimentoEstoque(dataMovimento);
                 if (rs == null) {
-                    setCodError(11);
+                    setCodError(12);
                     throw new Exception(msgError());
                 }
             } catch (SQLException sqlE) {
-                setCodError(6);
+                setCodError(7);
                 throw new Exception(msgError()+" "+sqlE);
             }
             return rs;
         } else {
             if (eDataValida(dataSQL[0])) {
-                setCodError(3);
+                setCodError(4);
                 throw new Exception(msgError());
             } else {
-                setCodError(4);
+                setCodError(5);
                 throw new Exception(msgError());
             }
         }
@@ -290,16 +320,20 @@ public class Movimentos implements GladioError {
             if (getIdTipoMovimento() < 0) {
                 setCodError(2);
             } else {
-                if (getNomeMovimento() == null || 
-                    !(getNomeMovimento().equalsIgnoreCase("VENDA") || 
-                      getNomeMovimento().equalsIgnoreCase("COMPRA"))) {
-                    setCodError(5);
+                if (getIdVariante() < 0) {
+                    setCodError(3);
                 } else {
-                    if (!eDataValida(getDataMovimento())) {
-                        setCodError(3);
+                    if (getNomeMovimento() == null || 
+                        !(getNomeMovimento().equalsIgnoreCase("VENDA") || 
+                          getNomeMovimento().equalsIgnoreCase("COMPRA"))) {
+                        setCodError(6);
                     } else {
-                        if (!eHoraValida(getHoraMovimento())) {
+                        if (!eDataValida(getDataMovimento())) {
                             setCodError(4);
+                        } else {
+                            if (!eHoraValida(getHoraMovimento())) {
+                                setCodError(5);
+                            }
                         }
                     }
                 }
@@ -409,6 +443,14 @@ public class Movimentos implements GladioError {
 
     public void setIdTipoMovimento(int idTipoMovimento) {
         this.idTipoMovimento = idTipoMovimento;
+    }
+
+    public int getIdVariante() {
+        return idVariante;
+    }
+
+    public void setIdVariante(int idVariante) {
+        this.idVariante = idVariante;
     }
 
     public String getDataMovimento() {

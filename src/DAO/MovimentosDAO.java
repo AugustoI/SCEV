@@ -19,13 +19,15 @@ import java.sql.SQLException;
  */
 public class MovimentosDAO {
     // ------------------------------------------------------------------------------------------------- INICIO METODOS DE INSERCAO 
-    public ResultSet inserirMovimentoEstoqueEObterId(String nomeMovimento, String dataMovimento) throws SQLException {
+    public ResultSet inserirMovimentoEstoqueEObterId(String nomeMovimento, String dataMovimento, int idVariante) throws SQLException {
         Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("insert into MovimentosEstoque (ID_Movimento, DataMovimento, ID_TipoMovimento)"
-                + " values(?,str_to_date(?,\"%d/%m/%Y %H:%i:%s\"),?)");
+        PreparedStatement SQL = con.prepareStatement("insert into MovimentosEstoque"
+                + "(ID_Movimento, DataMovimento, ID_TipoMovimento, ID_Variante) "
+                + "values(?,str_to_date(?,\"%d/%m/%Y %H:%i:%s\"),?,?)");
         SQL.setInt(1, obterIdMovimentoEstoque());
         SQL.setString(2, dataMovimento);
         SQL.setInt(3, obterIdTipoMovimento(nomeMovimento));
+        SQL.setInt(4, idVariante);
         SQL.executeUpdate();
         
         SQL = con.prepareStatement("select max(ID_Movimento) as ID from MovimentosEstoque");
@@ -37,13 +39,15 @@ public class MovimentosDAO {
         }
     }
     
-    public void inserirMovimentoEstoque(String nomeMovimento, String dataMovimento) throws SQLException {
+    public void inserirMovimentoEstoque(String nomeMovimento, String dataMovimento, int idVariante) throws SQLException {
         Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("insert into MovimentosEstoque (ID_Movimento, DataMovimento, ID_TipoMovimento)"
-                + " values(?,str_to_date(?,\"%d/%m/%Y %H:%i:%s\"),?)");
+        PreparedStatement SQL = con.prepareStatement("insert into MovimentosEstoque "
+                + "(ID_Movimento, DataMovimento, ID_TipoMovimento, ID_Variante) "
+                + "values(?,str_to_date(?,\"%d/%m/%Y %H:%i:%s\"),?,?)");
         SQL.setInt(1, obterIdMovimentoEstoque());
         SQL.setString(2, dataMovimento);
         SQL.setInt(3, obterIdTipoMovimento(nomeMovimento));
+        SQL.setInt(4, idVariante);
         SQL.executeUpdate();
     }
     // ------------------------------------------------------------------------------------------------- FIM METODOS DE INSERCAO 
@@ -76,6 +80,18 @@ public class MovimentosDAO {
         Connection con = new ConexaoDAO().conectar();
         PreparedStatement SQL = con.prepareStatement("select * from MovimentosEstoque where ID_TipoMovimento=?");     
         SQL.setInt(1, idTipoMovimento);
+        ResultSet rs = SQL.executeQuery();
+        if (rs.next()) {
+            return rs;
+        } else {
+            return null;
+        }
+    }
+    
+    public ResultSet pesquisarMovimentoEstoquePeloIdVariante(int idVariante) throws SQLException {
+        Connection con = new ConexaoDAO().conectar();
+        PreparedStatement SQL = con.prepareStatement("select * from MovimentosEstoque where ID_Variante=?");     
+        SQL.setInt(1, idVariante);
         ResultSet rs = SQL.executeQuery();
         if (rs.next()) {
             return rs;
