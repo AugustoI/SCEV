@@ -9,7 +9,6 @@
 package Entidades;
 
 import DAO.ClientesDAO;
-import DAO.MovimentosDAO;
 import Interface.GladioError;
 import java.sql.ResultSet;
 import java.sql.SQLException;
