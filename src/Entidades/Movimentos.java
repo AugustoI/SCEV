@@ -12,7 +12,6 @@ import DAO.MovimentosDAO;
 import Interface.GladioError;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -86,7 +85,7 @@ public class Movimentos implements GladioError {
      */
     @Override
     public String msgErrorByCod(int codError) {       
-        String msg, prefix = "[ERRO] Vendas: ";
+        String msg, prefix = "[ERRO] Movimentos: ";
         switch (codError) {
             case 0:
                 msg = prefix+"Não há erros.";
@@ -143,15 +142,18 @@ public class Movimentos implements GladioError {
      * Metodo para movimentar um novo estoque sem passar a data atual.
      * Obs.: a data é gerada pela data atual do computador.
      */
-    public void novoMovimentoEstoqueEObterId(int idMovimento, int idTipoMovimento, int idVariante,
+    public int novoMovimentoEstoqueEObterId(int idMovimento, int idTipoMovimento, int idVariante,
             String nomeMovimento) throws Exception {
+        
         SimpleDateFormat formatoData = new SimpleDateFormat("dd/MM/yyyy");
         SimpleDateFormat formatoHora = new SimpleDateFormat("HH:mm:ss");
         Date date = new Date();
+        
         String dataFormatada = formatoData.format(date);
         String horaFormatada = formatoHora.format(date);
-        novoMovimentoEstoqueEObterId(idMovimento, idTipoMovimento, idVariante,
-                                     dataFormatada, horaFormatada, nomeMovimento);
+        
+        return novoMovimentoEstoqueEObterId(idMovimento, idTipoMovimento, idVariante,
+                                            dataFormatada, horaFormatada, nomeMovimento);
     }
     
     /*
@@ -164,6 +166,7 @@ public class Movimentos implements GladioError {
         setIdTipoMovimento(idMovimento);
         setIdVariante(idVariante);
         setDataMovimento(dataMovimento);
+        setHoraMovimento(horaMovimento);
         setNomeMovimento(nomeMovimento);
         
         confereParametrosNovoMovimentoEstoque();
@@ -283,8 +286,9 @@ public class Movimentos implements GladioError {
      * Metodo para pesquisar todos os movimentos do estoque pela data do movimento.
      */
     public ResultSet pesquisarMovimentoEstoque(String dataMovimento) throws Exception {
+        Auxiliares aux = new Auxiliares();
         String[] dataSQL = dataMovimento.split(" ");
-        if (eDataValida(dataSQL[0]) && eHoraValida(dataSQL[1])) {
+        if (aux.eDataValida(dataSQL[0]) && aux.eHoraValida(dataSQL[1])) {
             ResultSet rs;
             try {
                 MovimentosDAO mDAO = new MovimentosDAO();
@@ -299,7 +303,7 @@ public class Movimentos implements GladioError {
             }
             return rs;
         } else {
-            if (eDataValida(dataSQL[0])) {
+            if (aux.eDataValida(dataSQL[0])) {
                 setCodError(4);
                 throw new Exception(msgError());
             } else {
@@ -328,10 +332,11 @@ public class Movimentos implements GladioError {
                           getNomeMovimento().equalsIgnoreCase("COMPRA"))) {
                         setCodError(6);
                     } else {
-                        if (!eDataValida(getDataMovimento())) {
+                        Auxiliares aux = new Auxiliares();
+                        if (!aux.eDataValida(getDataMovimento())) {
                             setCodError(4);
                         } else {
-                            if (!eHoraValida(getHoraMovimento())) {
+                            if (!aux.eHoraValida(getHoraMovimento())) {
                                 setCodError(5);
                             }
                         }
@@ -339,92 +344,6 @@ public class Movimentos implements GladioError {
                 }
             }
         }
-    }
-    
-    /**
-     * Metodo para conferir se uma data e valida.
-     * 
-     * @param data - data a ser verificada.
-     * 
-     * @return true  -> data valida.
-     *         false -> data invalida.
-     */
-    public boolean eDataValida(String data) {
-        boolean r = true;
-        int tamanho = data.length();
-        if (tamanho == 10) {
-            int i = 0;
-            // testar se o formato da data e valido
-            while (i < tamanho && r) {
-                if (i == 2 || i == 5) {
-                    if (data.charAt(i) != '/') {
-                        r = false;
-                    }
-                } else {
-                    if (data.charAt(i) < '0' ||
-                        data.charAt(i) > '9') {
-                        r = false;
-                    }
-                }
-                i = i + 1;
-            }
-            
-            if (r) {
-                try {
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                    sdf.setLenient(false);
-                    sdf.parse(data);
-                } catch (ParseException pe) {
-                    r = false;
-                }
-            }
-        } else {
-            r = false;
-        }
-        return r;
-    }
-    
-    /**
-     * Metodo para conferir se uma hora e valida.
-     * 
-     * @param hora - hora a ser verificada.
-     * 
-     * @return true  -> hora valida.
-     *         false -> hora invalida.
-     */
-    public boolean eHoraValida(String hora) {
-        boolean r = true;
-        int tamanho = hora.length();
-        if (tamanho == 8) {
-            int i = 0;
-            // testar se o formato da data e valido
-            while (i < tamanho && r) {
-                if (i == 2 || i == 5) {
-                    if (hora.charAt(i) != ':') {
-                        r = false;
-                    }
-                } else {
-                    if (hora.charAt(i) < '0' ||
-                        hora.charAt(i) > '9') {
-                        r = false;
-                    }
-                }
-                i = i + 1;
-            }
-            
-            if (r) {
-                try {
-                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-                    sdf.setLenient(false);
-                    sdf.parse(hora);
-                } catch (ParseException pe) {
-                    r = false;
-                }
-            }
-        } else {
-            r = false;
-        }
-        return r;
     }
     // ------------------------------------------------------------------------------------------------- FIM AUXILIARES CLASSE VENDA
 

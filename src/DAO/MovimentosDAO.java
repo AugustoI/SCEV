@@ -102,7 +102,7 @@ public class MovimentosDAO {
     
     public ResultSet pesquisarMovimentoEstoque(String dataMovimento) throws SQLException {
         Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("select * from MovimentosEstoque where ID_TipoMovimento='?'");     
+        PreparedStatement SQL = con.prepareStatement("select * from MovimentosEstoque where DataMovimento='?'");     
         SQL.setString(1, dataMovimento);
         ResultSet rs = SQL.executeQuery();
         if (rs.next()) {
@@ -125,7 +125,7 @@ public class MovimentosDAO {
     
     private int obterIdTipoMovimento(String nomeMovimento) throws SQLException {
         Connection con = new ConexaoDAO().conectar();
-        PreparedStatement SQL = con.prepareStatement("select ID_TipoMovimento as ID from tiposmovimentos where NomeMovimento = ?");  
+        PreparedStatement SQL = con.prepareStatement("select ID_TipoMovimento as ID from tiposmovimentos where NomeMovimento=?");  
         SQL.setString(1, nomeMovimento);
         ResultSet rs = SQL.executeQuery();
         if (rs.next()) {
