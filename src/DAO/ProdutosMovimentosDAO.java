@@ -58,6 +58,39 @@ public class ProdutosMovimentosDAO implements ClasseDAO{
         }
         return Executou;
     }
+    
+    public boolean Inserir(ResultSet rsInserir) {
+        Connection con;
+        MensagemErro = "";
+        boolean Executou = true;
+        String sqlInsert;
+        try {
+            con = new ConexaoDAO().conectar();
+            sqlInsert = "insert into produtosmovimentos (ID_Movimento,ID_Produto,Quantidade) values "; 
+            
+            while (!rsDados.isAfterLast()) {
+                rsDados.next();
+                sqlInsert = sqlInsert + "("+rsInserir.getString(1)+","+rsInserir.getString(2)+","+rsInserir.getString(3)+") ";                
+            }
+            
+            PreparedStatement SQL = con.prepareStatement(sqlInsert);
+                     
+            try {
+                SQL.executeUpdate();
+                Limpar();
+            } catch (SQLException e) {
+                Executou = false;
+                MensagemErro = e.getMessage();
+            }
+            
+            if (!Executou){
+                MensagemErro = "Não foi possível inserir: " + MensagemErro;
+            }
+        } catch (SQLException ex) {
+            MensagemErro = "Não foi possível inserir: " + ex.getMessage();
+        }
+        return Executou;
+    }
 
     @Override
     public boolean Editar() {
@@ -71,9 +104,56 @@ public class ProdutosMovimentosDAO implements ClasseDAO{
 
     @Override
     public boolean Pesquisar() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Connection con;
+        MensagemErro = "";
+        boolean Executou = true;
+        try {
+            con = new ConexaoDAO().conectar();
+            PreparedStatement SQL = con.prepareStatement("select * from produtosmovimentos where ID_Movimento = ?");   
+            SQL.setInt(1, this.getID_Movimento());
+            
+            try {
+                rsDados = SQL.executeQuery();
+                Executou = rsDados.next();
+                SetProdutoMovimento();
+            } catch (SQLException e) {
+                Executou = false;
+                MensagemErro = "Erro ao realizar a busca dos dados: " + e.getMessage();
+            }
+            
+        } catch (SQLException ex) {
+            MensagemErro = "Erro ao realizar a busca dos dados: " + ex.getMessage();
+        }
+        
+        return Executou;
     }
 
+    
+    public boolean Pesquisar(String Produto) {
+        Connection con;
+        MensagemErro = "";
+        boolean Executou = true;
+        try {
+            con = new ConexaoDAO().conectar();
+            PreparedStatement SQL = con.prepareStatement("select * from produtosmovimentos where ID_Produto = ?");   
+            SQL.setInt(1, this.getID_Produto());
+            
+            try {
+                rsDados = SQL.executeQuery();
+                Executou = rsDados.next();
+                SetProdutoMovimento();
+            } catch (SQLException e) {
+                Executou = false;
+                MensagemErro = "Erro ao realizar a busca dos dados: " + e.getMessage();
+            }
+            
+        } catch (SQLException ex) {
+            MensagemErro = "Erro ao realizar a busca dos dados: " + ex.getMessage();
+        }
+        
+        return Executou;
+    }
+    
     private void SetProdutoMovimento () {
         try {
             this.setID_Movimento(rsDados.getInt("ID_Movimento"));
@@ -100,7 +180,10 @@ public class ProdutosMovimentosDAO implements ClasseDAO{
     
     @Override
     public void Limpar() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.setID_Movimento(0);
+        this.setID_Produto(0);
+        this.setID_ProdutoMovimento(0);
+        this.setQuantidade(0);
     }
 
     public int getID_ProdutoMovimento() {
