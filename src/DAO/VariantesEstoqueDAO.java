@@ -8,6 +8,7 @@
  */
 package DAO;
 
+import Interface.ClasseDAO;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -73,8 +74,9 @@ public class VariantesEstoqueDAO implements ClasseDAO{
                 MensagemErro = "Não foi possível inserir: " + MensagemErro;
             }
 
-            SQL = con.prepareStatement("select max(ID_Variante) as ID from variantesestoque");
+            SQL = con.prepareStatement("select * from variantesestoque");
             this.rsDados = SQL.executeQuery();
+            SetVariante();
             
         } catch (SQLException ex) {
             MensagemErro = "Não foi possível inserir: " + ex.getMessage();
@@ -155,6 +157,10 @@ public class VariantesEstoqueDAO implements ClasseDAO{
         }
     }
     
+    /**
+     *
+     */
+    @Override
     public void Limpar () {
         this.setID_Variante(0);
         this.setNome("");
@@ -307,17 +313,25 @@ public class VariantesEstoqueDAO implements ClasseDAO{
         boolean Executou = true;
         try {
             con = new ConexaoDAO().conectar();
-            PreparedStatement SQL = con.prepareStatement("delete from variantesestoque where ID_Variante = ?");   
-            SQL.setInt(1, this.ID_Variante);
-            
-            try {
-                SQL.executeUpdate();
-                rsDados = null;
-                Executou = true;
-            } catch (SQLException e) {
+            PreparedStatement sqlConsistir = con.prepareStatement(" select count(1) as Count from movimentosestoque where ID_Variante = ? ");
+            ResultSet rsConsistir = sqlConsistir.executeQuery();
+            if (rsConsistir.getInt("Count") > 0){
                 Executou = false;
-                MensagemErro = "Erro ao realizar a exclusão dos dados: " + e.getMessage();
-            }                       
+                MensagemErro = "Movimentado";
+            }else{
+                PreparedStatement SQL = con.prepareStatement("delete from variantesestoque where ID_Variante = ?");   
+                SQL.setInt(1, this.ID_Variante);
+
+                try {
+                    SQL.executeUpdate();
+                    rsDados = null;
+                    Executou = true;
+                } catch (SQLException e) {
+                    Executou = false;
+                    MensagemErro = "Erro ao realizar a exclusão dos dados: " + e.getMessage();
+                }    
+            }
+            
             
         } catch (SQLException ex) {
             MensagemErro = "Erro ao realizar a exclusão dos dados: " + ex.getMessage();
