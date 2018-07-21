@@ -8,7 +8,7 @@
  */
 package Entidades;
 
-import DAO.ClientesDAO;
+import DAO.VariantesEstoqueDAO;
 import Interface.GladioError;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -204,7 +204,7 @@ public class Clientes implements GladioError {
             throw new Exception(msgError());
         } else {
             try {
-                ClientesDAO cDAO = new ClientesDAO();
+                VariantesEstoqueDAO cDAO = new VariantesEstoqueDAO();
                 String dataHora = getDataCadastro()+" "+getHoraCadastro();
                 ResultSet rs = cDAO.inserirClienteEObterId(nome, cpf, telCelular, telFixo, cep, rua, complemento, bairro,
                                                            dataHora, 'C');
@@ -227,7 +227,7 @@ public class Clientes implements GladioError {
     public ResultSet pesquisarClientes() throws Exception {
         ResultSet rs;
         try {
-            ClientesDAO cDAO = new ClientesDAO();
+            VariantesEstoqueDAO cDAO = new VariantesEstoqueDAO();
             rs = cDAO.pesquisarClientes();
             if (rs == null) {
                 setCodError(14);
@@ -247,7 +247,7 @@ public class Clientes implements GladioError {
         if (idVariante >= 0) {
             ResultSet rs;
             try {
-                ClientesDAO cDAO = new ClientesDAO();
+                VariantesEstoqueDAO cDAO = new VariantesEstoqueDAO();
                 rs = cDAO.pesquisarCliente(idVariante);
                 if (rs == null) {
                     setCodError(15);
@@ -271,7 +271,7 @@ public class Clientes implements GladioError {
         if (nome == null) {
             ResultSet rs;
             try {
-                ClientesDAO cDAO = new ClientesDAO();
+                VariantesEstoqueDAO cDAO = new VariantesEstoqueDAO();
                 rs = cDAO.pesquisarCliente(nome);
                 if (rs == null) {
                     setCodError(16);
@@ -295,7 +295,7 @@ public class Clientes implements GladioError {
         if (cpf == null) {
             ResultSet rs;
             try {
-                ClientesDAO cDAO = new ClientesDAO();
+                VariantesEstoqueDAO cDAO = new VariantesEstoqueDAO();
                 rs = cDAO.pesquisarClienteCPF(cpf);
                 if (rs == null) {
                     setCodError(17);
@@ -319,7 +319,7 @@ public class Clientes implements GladioError {
         if (dataCadastro == null) {
             ResultSet rs;
             try {
-                ClientesDAO cDAO = new ClientesDAO();
+                VariantesEstoqueDAO cDAO = new VariantesEstoqueDAO();
                 rs = cDAO.pesquisarClienteDataCadastro(dataCadastro);
                 if (rs == null) {
                     setCodError(18);
