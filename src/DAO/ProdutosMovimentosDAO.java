@@ -6,16 +6,57 @@
 package DAO;
 
 import Interface.ClasseDAO;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import javax.swing.JOptionPane;
 
 /**
  *
  * @author ACER
  */
 public class ProdutosMovimentosDAO implements ClasseDAO{
+    private int ID_ProdutoMovimento;
+    private int ID_Movimento;
+    private int ID_Produto;
+    private double Quantidade;
 
+    public ResultSet rsDados;
+    public String MensagemErro;
+    
     @Override
     public boolean Inserir() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Connection con;
+        MensagemErro = "";
+        boolean Executou = true;
+        try {
+            con = new ConexaoDAO().conectar();
+            PreparedStatement SQL = con.prepareStatement("insert into produtosmovimentos (ID_Movimento,ID_Produto,Quantidade)\n" +
+                                                         "values(?,?,?)");
+            SQL.setInt(1, this.getID_Movimento());
+            SQL.setInt(2, this.getID_Produto());
+            SQL.setDouble(3, this.getQuantidade());
+                     
+            try {
+                SQL.executeUpdate();
+                getUltimoID_ProdutoMovimento();
+                SQL = con.prepareStatement("select * from produtosmovimentos where ID_ProdutoMovimento = ?");
+                SQL.setInt(1, this.getID_ProdutoMovimento());
+                this.rsDados = SQL.executeQuery();
+                SetProdutoMovimento();
+            } catch (SQLException e) {
+                Executou = false;
+                MensagemErro = e.getMessage();
+            }
+            
+            if (!Executou){
+                MensagemErro = "Não foi possível inserir: " + MensagemErro;
+            }
+        } catch (SQLException ex) {
+            MensagemErro = "Não foi possível inserir: " + ex.getMessage();
+        }
+        return Executou;
     }
 
     @Override
@@ -33,9 +74,64 @@ public class ProdutosMovimentosDAO implements ClasseDAO{
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    private void SetProdutoMovimento () {
+        try {
+            this.setID_Movimento(rsDados.getInt("ID_Movimento"));
+            this.setID_Produto(rsDados.getInt("ID_Produto"));
+            this.setID_ProdutoMovimento(rsDados.getInt("ID_ProdutoMovimento"));
+            this.setQuantidade(rsDados.getDouble("Quantidade"));
+        } catch (SQLException e) {
+            JOptionPane.showConfirmDialog(null, "Erro inesperdo", "Comunique a Gládio Softwares.", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void getUltimoID_ProdutoMovimento(){
+        Connection con;
+        try {
+            con = new ConexaoDAO().conectar();
+            PreparedStatement SQL = con.prepareStatement("select ID_ProdutoMovimento from produtosmovimentos \n" +
+                                    " where ID_ProdutoMovimento in (select max(ID_ProdutoMovimento) from produtosmovimentos) ");
+            ResultSet rsBusca = SQL.executeQuery();
+            this.setID_ProdutoMovimento(rsBusca.getInt(1));
+        } catch (SQLException e) {
+            JOptionPane.showConfirmDialog(null, "Erro inesperdo", "Comunique a Gládio Softwares.", JOptionPane.ERROR_MESSAGE);
+        }            
+    }
+    
     @Override
     public void Limpar() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-        
+
+    public int getID_ProdutoMovimento() {
+        return ID_ProdutoMovimento;
+    }
+
+    public void setID_ProdutoMovimento(int ID_ProdutoMovimento) {
+        this.ID_ProdutoMovimento = ID_ProdutoMovimento;
+    }
+
+    public int getID_Movimento() {
+        return ID_Movimento;
+    }
+
+    public void setID_Movimento(int ID_Movimento) {
+        this.ID_Movimento = ID_Movimento;
+    }
+
+    public int getID_Produto() {
+        return ID_Produto;
+    }
+
+    public void setID_Produto(int ID_Produto) {
+        this.ID_Produto = ID_Produto;
+    }
+
+    public double getQuantidade() {
+        return Quantidade;
+    }
+
+    public void setQuantidade(double Quantidade) {
+        this.Quantidade = Quantidade;
+    }
 }

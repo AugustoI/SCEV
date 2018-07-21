@@ -74,7 +74,8 @@ public class VariantesEstoqueDAO implements ClasseDAO{
                 MensagemErro = "Não foi possível inserir: " + MensagemErro;
             }
 
-            SQL = con.prepareStatement("select * from variantesestoque");
+            SQL = con.prepareStatement("select * from variantesestoque where ID_Variante = ?");
+            SQL.setInt(1, this.getID_Variante());
             this.rsDados = SQL.executeQuery();
             SetVariante();
             
