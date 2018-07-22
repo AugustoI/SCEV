@@ -1,220 +1,411 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Classe ProdutosMovimentosDAO
+ *
+ * Classe utilizada para controle dos movimentos dos produtos.
+ *
+ * Contem metodos de manipulacao do banco de dados.
+ *
+ * Versao: 1.0.0
  */
 package DAO;
 
+import Entidades.GladioError;
 import Interface.ClasseDAO;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import javax.swing.JOptionPane;
 
 /**
  *
- * @author ACER
+ * @author ACER | Couth
  */
-public class ProdutosMovimentosDAO implements ClasseDAO{
-    private int ID_ProdutoMovimento;
-    private int ID_Movimento;
-    private int ID_Produto;
-    private double Quantidade;
+public class ProdutosMovimentosDAO implements ClasseDAO {
+    
+    /*
+    * Atributos da classe
+    */
+    private int idProdutoMovimento;
+    private int idMovimento;
+    private int idProduto;
+    private double quantidade;
+    
+    private final GladioError ge = new GladioError();
 
     public ResultSet rsDados;
-    public String MensagemErro;
     
+    // --------------------------------------------------------------------------------------------------------------- INICIO INTERFACE
+    /**
+     * Metodo para inserir um novo dado na tabela produtosmovimentos.
+     * 
+     * @return true  - insercao efetuada com sucesso.
+     *         false - erro na insercao.
+     * 
+     * @throws java.lang.Exception - Mensagem referente ao codigo de erro.
+     */
     @Override
-    public boolean Inserir() {
-        Connection con;
-        MensagemErro = "";
-        boolean Executou = true;
-        try {
-            con = new ConexaoDAO().conectar();
-            PreparedStatement SQL = con.prepareStatement("insert into produtosmovimentos (ID_Movimento,ID_Produto,Quantidade)\n" +
-                                                         "values(?,?,?)");
-            SQL.setInt(1, this.getID_Movimento());
-            SQL.setInt(2, this.getID_Produto());
-            SQL.setDouble(3, this.getQuantidade());
-                     
+    public boolean inserir() throws Exception {
+        if (conferir(0)){
+            boolean executou = false;
             try {
+                Connection con = new ConexaoDAO().conectar();
+                PreparedStatement SQL = con.prepareStatement("insert into produtosmovimentos "
+                    + "(ID_Movimento,ID_Produto,Quantidade) "
+                    + "values(?,?,?)");
+                SQL.setInt(1, getIdMovimento());
+                SQL.setInt(2, getIdProduto());
+                SQL.setDouble(3, getQuantidade());
                 SQL.executeUpdate();
-                getUltimoID_ProdutoMovimento();
-                SQL = con.prepareStatement("select * from produtosmovimentos where ID_ProdutoMovimento = ?");
-                SQL.setInt(1, this.getID_ProdutoMovimento());
-                this.rsDados = SQL.executeQuery();
-                SetProdutoMovimento();
-            } catch (SQLException e) {
-                Executou = false;
-                MensagemErro = e.getMessage();
+
+                ResultSet rs = getUltimoIdProdutoMovimento();
+                if (rs == null) {
+                    ge.setCodError(0); // NUMERO COD ERRO
+                    throw new Exception(ge.msgError());
+                } else {
+                    int id = rs.getInt(1);
+                    setIdProdutoMovimento(id);
+                    SQL = con.prepareStatement("select * from produtosmovimentos where ID_ProdutoMovimento = ?");
+                    SQL.setInt(1, getIdProdutoMovimento());
+                    setRsDados(SQL.executeQuery());
+                    executou = true;
+                    setProdutoMovimento();
+                }
+            } catch (SQLException sqlE) {
+                ge.setCodError(0); // NUMERO COD ERRO
+                throw new Exception(ge.msgError());
+                //mensagemErro = "Não foi possível inserir: " + sqlE.getMessage();
             }
-            
-            if (!Executou){
-                MensagemErro = "Não foi possível inserir: " + MensagemErro;
-            }
-        } catch (SQLException ex) {
-            MensagemErro = "Não foi possível inserir: " + ex.getMessage();
+            return executou;
+        } else {
+            ge.setCodError(0); // NUMERO COD ERRO
+            throw new Exception(ge.msgError());
         }
-        return Executou;
     }
     
-    public boolean Inserir(ResultSet rsInserir) {
-        Connection con;
-        MensagemErro = "";
-        boolean Executou = true;
-        String sqlInsert;
-        try {
-            con = new ConexaoDAO().conectar();
-            sqlInsert = "insert into produtosmovimentos (ID_Movimento,ID_Produto,Quantidade) values "; 
-            
-            while (!rsDados.isAfterLast()) {
-                rsDados.next();
-                sqlInsert = sqlInsert + "("+rsInserir.getString(1)+","+rsInserir.getString(2)+","+rsInserir.getString(3)+") ";                
-            }
-            
-            PreparedStatement SQL = con.prepareStatement(sqlInsert);
-                     
+    /**
+     * Metodo para insercao de dados na tabela produtosmovimentos a partir de um
+     * resultset
+     * 
+     * @param rsInserir - resultset contendo os dados a serem inseridos.
+     * 
+     * @return true  - insercao efetuada com sucesso.
+     *         false - erro na insercao.
+     * 
+     * @throws java.lang.Exception - Mensagem referente ao codigo de erro.
+     */
+    public boolean inserir(ResultSet rsInserir) throws Exception {
+        if (rsInserir != null) {
+            boolean executou = false;
             try {
-                SQL.executeUpdate();
-                Limpar();
-            } catch (SQLException e) {
-                Executou = false;
-                MensagemErro = e.getMessage();
+                Connection con = new ConexaoDAO().conectar();
+                PreparedStatement SQL;
+                String statement = "insert into produtosmovimentos (ID_Movimento,ID_Produto,Quantidade) values ";
+                while (rsInserir.next()) {                    
+                    SQL = con.prepareStatement(statement + 
+                            " (" + rsInserir.getInt(1) +
+                            ", " + rsInserir.getInt(2) +
+                            ", " + rsInserir.getDouble(3) + ")");
+                    
+                    SQL.executeUpdate();
+                    limpar();
+                }
+                executou = true;
+            } catch (SQLException sqlE) {
+                ge.setCodError(0); // NUMERO COD ERRO
+                throw new Exception(ge.msgError());
+                //mensagemErro = "Não foi possível inserir: " + sqlE.getMessage();
             }
-            
-            if (!Executou){
-                MensagemErro = "Não foi possível inserir: " + MensagemErro;
-            }
-        } catch (SQLException ex) {
-            MensagemErro = "Não foi possível inserir: " + ex.getMessage();
-        }
-        return Executou;
+            return executou;
+        } else {
+            ge.setCodError(0); // NUMERO COD ERRO
+            throw new Exception(ge.msgError());
+        }        
+//        Connection con;
+//        MensagemErro = "";
+//        boolean Executou = true;
+//        String sqlInsert;
+//        try {
+//            con = new ConexaoDAO().conectar();
+//            sqlInsert = "insert into produtosmovimentos (ID_Movimento,ID_Produto,Quantidade) values "; 
+//            
+//            while (!rsDados.isAfterLast()) {
+//                rsDados.next();
+//                sqlInsert = sqlInsert + "("+rsInserir.getString(1)+","+rsInserir.getString(2)+","+rsInserir.getString(3)+") ";                
+//            }
+//            
+//            PreparedStatement SQL = con.prepareStatement(sqlInsert);
+//                     
+//            try {
+//                SQL.executeUpdate();
+//                Limpar();
+//            } catch (SQLException e) {
+//                Executou = false;
+//                MensagemErro = e.getMessage();
+//            }
+//            
+//            if (!Executou){
+//                MensagemErro = "Não foi possível inserir: " + MensagemErro;
+//            }
+//        } catch (SQLException ex) {
+//            MensagemErro = "Não foi possível inserir: " + ex.getMessage();
+//        }
+//        return Executou;
     }
 
+    /**
+     * Metodo para edicao de dados na tabela produtosmovimentos.
+     * 
+     * ATENCAO: A tabela produtosmovimentos nao suporta edicao de dados.
+     * 
+     * @return false.
+     * 
+     * @throws java.lang.Exception - Mensagem referente ao codigo de erro.
+     */
     @Override
-    public boolean Editar() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean editar() throws Exception {
+        return false;
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * Metodo para exclusao de dados na tabela produtosmovimentos.
+     * 
+     * ATENCAO: A tabela produtosmovimentos nao suporta exclusao de dados.
+     * 
+     * @return false.
+     * 
+     * @throws java.lang.Exception - Mensagem referente ao codigo de erro.
+     */
     @Override
-    public boolean Deletar() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean deletar() throws Exception {
+        return false;
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * Metodo para pesquisar um dado ja existente na tabela produtosmovimentos a
+     * partir do seu id.
+     * 
+     * @return true  - pesquisa efetuada com sucesso.
+     *         false - erro na pesquisa.
+     * 
+     * @throws java.lang.Exception - Mensagem referente ao codigo de erro.
+     */
     @Override
-    public boolean Pesquisar() {
-        Connection con;
-        MensagemErro = "";
-        boolean Executou = true;
-        try {
-            con = new ConexaoDAO().conectar();
-            PreparedStatement SQL = con.prepareStatement("select * from produtosmovimentos where ID_Movimento = ?");   
-            SQL.setInt(1, this.getID_Movimento());
-            
+    public boolean pesquisar() throws Exception {
+        if (conferir(1)) {
+            boolean executou = false;
             try {
-                rsDados = SQL.executeQuery();
-                Executou = rsDados.next();
-                SetProdutoMovimento();
-            } catch (SQLException e) {
-                Executou = false;
-                MensagemErro = "Erro ao realizar a busca dos dados: " + e.getMessage();
+                Connection con = new ConexaoDAO().conectar();
+                PreparedStatement SQL = con.prepareStatement("select * from produtosmovimentos where ID_Movimento = ?");
+                SQL.setInt(1, getIdMovimento());
+                setRsDados(SQL.executeQuery());
+                executou = true;
+                
+                setProdutoMovimento();
+            } catch (SQLException sqlE) {
+                ge.setCodError(0); // NUMERO COD ERRO
+                throw new Exception(ge.msgError());
+                //mensagemErro = "Não foi possível inserir: " + sqlE.getMessage();
             }
-            
-        } catch (SQLException ex) {
-            MensagemErro = "Erro ao realizar a busca dos dados: " + ex.getMessage();
+            return executou;
+        } else {
+            ge.setCodError(0); // NUMERO COD ERRO
+            throw new Exception(ge.msgError());
         }
-        
-        return Executou;
     }
 
+    /**
+     * Metodo para pesquisar um dado ja existente na tabela produtosmovimentos a
+     * partir do seu id.
+     * 
+     * @return true  - pesquisa efetuada com sucesso.
+     *         false - erro na pesquisa.
+     * 
+     * @throws java.lang.Exception - Mensagem referente ao codigo de erro.
+     */
+    public boolean pesquisarIdProduto() throws Exception {
+        if (conferir(2)) {
+            boolean executou = false;
+            try {
+                Connection con = new ConexaoDAO().conectar();
+                PreparedStatement SQL = con.prepareStatement("select * from produtosmovimentos where ID_Produto = ?");
+                SQL.setInt(1, getIdProduto());
+                setRsDados(SQL.executeQuery());
+                executou = true;
+                
+                setProdutoMovimento();
+            } catch (SQLException sqlE) {
+                ge.setCodError(0); // NUMERO COD ERRO
+                throw new Exception(ge.msgError());
+                //mensagemErro = "Não foi possível inserir: " + sqlE.getMessage();
+            }
+            return executou;
+        } else {
+            ge.setCodError(0); // NUMERO COD ERRO
+            throw new Exception(ge.msgError());
+        }
+//  public boolean pesquisar(String produto) throws Exception {
+//        Connection con;
+//        MensagemErro = "";
+//        boolean Executou = true;
+//        try {
+//            con = new ConexaoDAO().conectar();
+//            PreparedStatement SQL = con.prepareStatement("select * from produtosmovimentos where ID_Produto = ?");   
+//            SQL.setInt(1, this.getID_Produto());
+//            
+//            try {
+//                rsDados = SQL.executeQuery();
+//                Executou = rsDados.next();
+//                SetProdutoMovimento();
+//            } catch (SQLException e) {
+//                Executou = false;
+//                MensagemErro = "Erro ao realizar a busca dos dados: " + e.getMessage();
+//            }
+//            
+//        } catch (SQLException ex) {
+//            MensagemErro = "Erro ao realizar a busca dos dados: " + ex.getMessage();
+//        }
+//        
+//        return Executou;
+    }
     
-    public boolean Pesquisar(String Produto) {
-        Connection con;
-        MensagemErro = "";
-        boolean Executou = true;
-        try {
-            con = new ConexaoDAO().conectar();
-            PreparedStatement SQL = con.prepareStatement("select * from produtosmovimentos where ID_Produto = ?");   
-            SQL.setInt(1, this.getID_Produto());
-            
-            try {
-                rsDados = SQL.executeQuery();
-                Executou = rsDados.next();
-                SetProdutoMovimento();
-            } catch (SQLException e) {
-                Executou = false;
-                MensagemErro = "Erro ao realizar a busca dos dados: " + e.getMessage();
-            }
-            
-        } catch (SQLException ex) {
-            MensagemErro = "Erro ao realizar a busca dos dados: " + ex.getMessage();
-        }
-        
-        return Executou;
+    /**
+     * Metodo para limpar os set's desta classe.
+     */
+    @Override
+    public void limpar() {
+        setIdMovimento(0);
+        setIdProduto(0);
+        setIdProdutoMovimento(0);
+        setQuantidade(0.0);
     }
+    // --------------------------------------------------------------------------------------------------------------- FIM INTERFACE
     
-    private void SetProdutoMovimento () {
+    // --------------------------------------------------------------------------------------------------------------- INICIO AUXILIARES    
+    /**
+     * Metodo para obter os dados da ultima acao e passa-los para a classe.
+     * 
+     * @throws java.lang.Exception - Mensagem referente ao codigo de erro.
+     */
+    private void setProdutoMovimento() throws Exception {
         try {
-            this.setID_Movimento(rsDados.getInt("ID_Movimento"));
-            this.setID_Produto(rsDados.getInt("ID_Produto"));
-            this.setID_ProdutoMovimento(rsDados.getInt("ID_ProdutoMovimento"));
-            this.setQuantidade(rsDados.getDouble("Quantidade"));
+            setIdMovimento(getRsDados().getInt("ID_Movimento"));
+            setIdProduto(getRsDados().getInt("ID_Produto"));
+            setIdProdutoMovimento(getRsDados().getInt("ID_ProdutoMovimento"));
+            setQuantidade(getRsDados().getDouble("Quantidade"));
         } catch (SQLException e) {
-            JOptionPane.showConfirmDialog(null, "Erro inesperdo", "Comunique a Gládio Softwares.", JOptionPane.ERROR_MESSAGE);
+            ge.setCodError(0); // NUMERO COD ERRO
+            throw new Exception(ge.msgError());
+            //JOptionPane.showConfirmDialog(null, "Erro inesperdo", "Comunique a Gládio Softwares.", JOptionPane.ERROR_MESSAGE);
         }
     }
     
-    private void getUltimoID_ProdutoMovimento(){
-        Connection con;
-        try {
-            con = new ConexaoDAO().conectar();
-            PreparedStatement SQL = con.prepareStatement("select ID_ProdutoMovimento from produtosmovimentos \n" +
-                                    " where ID_ProdutoMovimento in (select max(ID_ProdutoMovimento) from produtosmovimentos) ");
-            ResultSet rsBusca = SQL.executeQuery();
-            this.setID_ProdutoMovimento(rsBusca.getInt(1));
-        } catch (SQLException e) {
-            JOptionPane.showConfirmDialog(null, "Erro inesperdo", "Comunique a Gládio Softwares.", JOptionPane.ERROR_MESSAGE);
-        }            
+    /**
+     * Metodo para obter o proximo id da tabela produtosmovimentos.
+     * 
+     * @return resultado obtido na pesquisa.
+     * 
+     * @throws java.lang.SQLException - Erro referente ao banco de dados.
+     */
+    private ResultSet getUltimoIdProdutoMovimento() throws SQLException {
+        Connection con = new ConexaoDAO().conectar();
+        PreparedStatement SQL = con.prepareStatement("select ID_ProdutoMovimento from produtosmovimentos " +
+            "where ID_ProdutoMovimento in (select max(ID_ProdutoMovimento) from produtosmovimentos)");     
+        ResultSet rs = SQL.executeQuery();
+        if (rs.next()) {
+            return rs;
+        } else {
+            return null;
+        }       
     }
     
-    @Override
-    public void Limpar() {
-        this.setID_Movimento(0);
-        this.setID_Produto(0);
-        this.setID_ProdutoMovimento(0);
-        this.setQuantidade(0);
+    /**
+     * Metodo para conferir se os parametros referente ao codigo estao corretos.
+     * 
+     * Codigos:
+     * 0 - Inserir | Inserir(ResultSet)
+     * 1 - Pesquisar
+     * 2 - PesquisarIdProduto
+     * 
+     * @param cod - codigo referente ao metodo utilizado.
+     * 
+     * @return true  - parametros corretos.
+     *         false - parametros incorretos.
+     */
+    private boolean conferir(int cod) {
+        boolean retorno = true;
+        switch (cod) {
+            case 0:
+                if (getIdMovimento() < 0) {
+                    retorno = false;
+                } else {
+                    if (getIdProduto() < 0) {
+                        retorno = false;
+                    } else {
+                        if (getQuantidade() < 0.0) {
+                            retorno = false;
+                        }
+                    }
+                }
+                break;
+            case 1:
+                if (getIdMovimento() < 0) {
+                    retorno = false;
+                }
+                break;
+            case 2:
+                if (getIdProduto() < 0) {
+                    retorno = false;
+                }
+                break;
+            default:
+                retorno = false;
+                break;
+        }
+        return retorno;
+    }
+    // --------------------------------------------------------------------------------------------------------------- FIMM AUXILIARES
+    
+    // --------------------------------------------------------------------------------------------------------------- INICIO SET|GET
+    public int getIdProdutoMovimento() {
+        return idProdutoMovimento;
     }
 
-    public int getID_ProdutoMovimento() {
-        return ID_ProdutoMovimento;
+    public void setIdProdutoMovimento(int idProdutoMovimento) {
+        this.idProdutoMovimento = idProdutoMovimento;
     }
 
-    public void setID_ProdutoMovimento(int ID_ProdutoMovimento) {
-        this.ID_ProdutoMovimento = ID_ProdutoMovimento;
+    public int getIdMovimento() {
+        return idMovimento;
     }
 
-    public int getID_Movimento() {
-        return ID_Movimento;
+    public void setIdMovimento(int idMovimento) {
+        this.idMovimento = idMovimento;
     }
 
-    public void setID_Movimento(int ID_Movimento) {
-        this.ID_Movimento = ID_Movimento;
+    public int getIdProduto() {
+        return idProduto;
     }
 
-    public int getID_Produto() {
-        return ID_Produto;
-    }
-
-    public void setID_Produto(int ID_Produto) {
-        this.ID_Produto = ID_Produto;
+    public void setIdProduto(int idProduto) {
+        this.idProduto = idProduto;
     }
 
     public double getQuantidade() {
-        return Quantidade;
+        return quantidade;
     }
 
-    public void setQuantidade(double Quantidade) {
-        this.Quantidade = Quantidade;
+    public void setQuantidade(double quantidade) {
+        this.quantidade = quantidade;
     }
+    
+    public ResultSet getRsDados() {
+        return rsDados;
+    }
+
+    public void setRsDados(ResultSet rsDados) {
+        this.rsDados = rsDados;
+    }
+    // --------------------------------------------------------------------------------------------------------------- INICIO SET|GET
 }
