@@ -10,16 +10,18 @@ package Interface;
  * @author ACER
  */
 public interface ClasseDAO {
+    
     /*
-    *Esses sãos os métodos báscios que toda classe de conexão com o banco deveria ter
-    */
-    public boolean Inserir();
-    public boolean Editar();
-    public boolean Deletar();
-    public boolean Pesquisar();
+     * Esses metodos sao requeridos em todas as classes de conexao com o banco de dados.
+     */
+    public boolean inserir() throws Exception;
+    public boolean editar() throws Exception;
+    public boolean deletar() throws Exception;
+    public boolean pesquisar() throws Exception;
+    
     /*
-    *Esse método limpa os atributos da classe
-    */
-    public void Limpar();
+     * Esse metodo limpa os atributos da classe
+     */
+    public void limpar();
     
 }
