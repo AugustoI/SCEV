@@ -11,7 +11,7 @@ import Interface.EntidadesBase;
  *
  * @author ACER
  */
-public class Vendas implements EntidadesBase{
+public class Clientes implements EntidadesBase{
 
     @Override
     public void SetTipo() {
