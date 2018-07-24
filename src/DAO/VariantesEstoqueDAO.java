@@ -81,7 +81,7 @@ public class VariantesEstoqueDAO implements ClasseDAO {
                 SQL = con.prepareStatement("select * from variantesestoque where ID_Variante = ?");
                 SQL.setInt(1, getIdVariante());
                 setRsDados(SQL.executeQuery());
-                executou = true;
+                executou = getRsDados().next();
                 
                 setVariante();
             } catch (SQLException sqlE) {
@@ -185,6 +185,8 @@ public class VariantesEstoqueDAO implements ClasseDAO {
                         SQL.executeUpdate();
                         setRsDados(null);
                         executou = true;
+                        
+                        limpar();
                     }
                 }
             } catch (SQLException sqlE) {
@@ -192,7 +194,6 @@ public class VariantesEstoqueDAO implements ClasseDAO {
                 throw new Exception(ge.msgError());
                 //mensagemErro = "Não foi possível inserir: " + sqlE.getMessage();
             }
-            limpar();
             return executou;
         } else {
             ge.setCodError(0); // NUMERO COD ERRO
@@ -218,7 +219,8 @@ public class VariantesEstoqueDAO implements ClasseDAO {
                 PreparedStatement SQL = con.prepareStatement("select * from variantesestoque where ID_Variante = ?");
                 SQL.setInt(1, getIdVariante());
                 setRsDados(SQL.executeQuery());
-                executou = true;
+                executou = getRsDados().next();
+                
                 setVariante();
             } catch (SQLException sqlE) {
                 ge.setCodError(0); // NUMERO COD ERRO
@@ -244,14 +246,17 @@ public class VariantesEstoqueDAO implements ClasseDAO {
      * @throws java.lang.Exception - Mensagem referente ao codigo de erro.
      */
     public boolean pesquisar(char tipo) throws Exception {
-        if (tipo == '?' || tipo == '?') {
+        if (getTipo() == 'c' || getTipo() == 'C' ||
+            getTipo() == 'f' || getTipo() == 'F') {
             boolean executou = false;
             try {
                 Connection con = new ConexaoDAO().conectar();
                 PreparedStatement SQL = con.prepareStatement("select * from variantesestoque where Tipo = '?'");
                 SQL.setString(1, ""+getTipo());
                 setRsDados(SQL.executeQuery());
-                executou = true;
+                executou = getRsDados().next();
+                
+                setVariante();
             } catch (SQLException sqlE) {
                 ge.setCodError(0); // NUMERO COD ERRO
                 throw new Exception(ge.msgError());
@@ -276,14 +281,16 @@ public class VariantesEstoqueDAO implements ClasseDAO {
      * @throws java.lang.Exception - Mensagem referente ao codigo de erro.
      */
     public boolean pesquisar(String nome) throws Exception {
-        if (nome != null && nome.length() > 0) {
+        if (getNome() != null && getNome().length() > 0) {
             boolean executou = false;
             try {
                 Connection con = new ConexaoDAO().conectar();
                 PreparedStatement SQL = con.prepareStatement("select * from variantesestoque where Nome like '?%'");
                 SQL.setString(1, getNome());
                 setRsDados(SQL.executeQuery());
-                executou = true;
+                executou = getRsDados().next();
+                
+                setVariante();
             } catch (SQLException sqlE) {
                 ge.setCodError(0); // NUMERO COD ERRO
                 throw new Exception(ge.msgError());
@@ -308,14 +315,16 @@ public class VariantesEstoqueDAO implements ClasseDAO {
      * @throws java.lang.Exception - Mensagem referente ao codigo de erro.
      */
      public boolean pesquisar(int cpf) throws Exception {
-        if (aux.eCpfValido(""+cpf)) {
+        if (aux.eCpfValido(getCpf())) {
             boolean executou = false;
             try {
                 Connection con = new ConexaoDAO().conectar();
                 PreparedStatement SQL = con.prepareStatement("select * from variantesestoque where CPF = '?'");
-                SQL.setString(1, ""+cpf);
+                SQL.setString(1, getCpf());
                 setRsDados(SQL.executeQuery());
-                executou = true;
+                executou = getRsDados().next();
+                
+                setVariante();
             } catch (SQLException sqlE) {
                 ge.setCodError(0); // NUMERO COD ERRO
                 throw new Exception(ge.msgError());
@@ -349,7 +358,9 @@ public class VariantesEstoqueDAO implements ClasseDAO {
                 SQL.setDate(1, (java.sql.Date) dataInicial);
                 SQL.setDate(2, (java.sql.Date) dataFinal);
                 setRsDados(SQL.executeQuery());
-                executou = true;
+                executou = getRsDados().next();
+                
+                setVariante();
             } catch (SQLException sqlE) {
                 ge.setCodError(0); // NUMERO COD ERRO
                 throw new Exception(ge.msgError());

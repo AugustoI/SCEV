@@ -71,7 +71,7 @@ public class MovimentosEstoqueDAO implements ClasseDAO {
                     SQL = con.prepareStatement("select * from MovimentosEstoque where ID_Movimento = ?");
                     SQL.setInt(1, getIdMovimento());
                     setRsDados(SQL.executeQuery());
-                    executou = true;
+                    executou = getRsDados().next();
                     
                     setMovimento();
                 }
@@ -113,7 +113,7 @@ public class MovimentosEstoqueDAO implements ClasseDAO {
                 SQL = con.prepareStatement("select * from MovimentosEstoque where ID_Movimento = ?");
                 SQL.setInt(1, getIdMovimento());
                 setRsDados(SQL.executeQuery());
-                executou = true;
+                executou = getRsDados().next();
                 
                 setMovimento();
             } catch (SQLException sqlE) {
@@ -147,12 +147,13 @@ public class MovimentosEstoqueDAO implements ClasseDAO {
                 SQL.executeUpdate();
                 setRsDados(null);
                 executou = true;
+                
+                limpar();
             } catch (SQLException sqlE) {
                 ge.setCodError(0); // NUMERO COD ERRO
                 throw new Exception(ge.msgError());
                 //mensagemErro = "Não foi possível inserir: " + sqlE.getMessage();
             }
-            limpar();
             return executou;
         } else {
             ge.setCodError(0); // NUMERO COD ERRO
@@ -179,7 +180,9 @@ public class MovimentosEstoqueDAO implements ClasseDAO {
                 PreparedStatement SQL = con.prepareStatement("select * from movimentosestoque where ID_Movimento = ?");
                 SQL.setInt(1, getIdMovimento());
                 setRsDados(SQL.executeQuery());
-                executou = true;
+                executou = getRsDados().next();
+                
+                setMovimento();
             } catch (SQLException sqlE) {
                 ge.setCodError(0); // NUMERO COD ERRO
                 throw new Exception(ge.msgError());
@@ -204,14 +207,16 @@ public class MovimentosEstoqueDAO implements ClasseDAO {
      * @throws java.lang.Exception - Mensagem referente ao codigo de erro.
      */
     public boolean pesquisar(int idVariante) throws Exception {
-        if (idVariante < 0) {
+        if (getIdVariante() < 0) {
             boolean executou = false;
             try {
                 Connection con = new ConexaoDAO().conectar();
                 PreparedStatement SQL = con.prepareStatement("select * from movimentosestoque where ID_Variante = ?");
-                SQL.setInt(1, idVariante);
+                SQL.setInt(1, getIdVariante());
                 setRsDados(SQL.executeQuery());
-                executou = true;
+                executou = getRsDados().next();
+                
+                setMovimento();
             } catch (SQLException sqlE) {
                 ge.setCodError(0); // NUMERO COD ERRO
                 throw new Exception(ge.msgError());
@@ -245,7 +250,9 @@ public class MovimentosEstoqueDAO implements ClasseDAO {
                 SQL.setDate(1, (java.sql.Date) dataInicial);
                 SQL.setDate(2, (java.sql.Date) dataFinal);
                 setRsDados(SQL.executeQuery());
-                executou = true;
+                executou = getRsDados().next();
+                
+                setMovimento();
             } catch (SQLException sqlE) {
                 ge.setCodError(0); // NUMERO COD ERRO
                 throw new Exception(ge.msgError());

@@ -67,7 +67,8 @@ public class ProdutosMovimentosDAO implements ClasseDAO {
                     SQL = con.prepareStatement("select * from produtosmovimentos where ID_ProdutoMovimento = ?");
                     SQL.setInt(1, getIdProdutoMovimento());
                     setRsDados(SQL.executeQuery());
-                    executou = true;
+                    executou = getRsDados().next();
+                    
                     setProdutoMovimento();
                 }
             } catch (SQLException sqlE) {
@@ -107,6 +108,7 @@ public class ProdutosMovimentosDAO implements ClasseDAO {
                             ", " + rsInserir.getDouble(3) + ")");
                     
                     SQL.executeUpdate();
+                    
                     limpar();
                 }
                 executou = true;
@@ -119,37 +121,7 @@ public class ProdutosMovimentosDAO implements ClasseDAO {
         } else {
             ge.setCodError(0); // NUMERO COD ERRO
             throw new Exception(ge.msgError());
-        }        
-//        Connection con;
-//        MensagemErro = "";
-//        boolean Executou = true;
-//        String sqlInsert;
-//        try {
-//            con = new ConexaoDAO().conectar();
-//            sqlInsert = "insert into produtosmovimentos (ID_Movimento,ID_Produto,Quantidade) values "; 
-//            
-//            while (!rsDados.isAfterLast()) {
-//                rsDados.next();
-//                sqlInsert = sqlInsert + "("+rsInserir.getString(1)+","+rsInserir.getString(2)+","+rsInserir.getString(3)+") ";                
-//            }
-//            
-//            PreparedStatement SQL = con.prepareStatement(sqlInsert);
-//                     
-//            try {
-//                SQL.executeUpdate();
-//                Limpar();
-//            } catch (SQLException e) {
-//                Executou = false;
-//                MensagemErro = e.getMessage();
-//            }
-//            
-//            if (!Executou){
-//                MensagemErro = "Não foi possível inserir: " + MensagemErro;
-//            }
-//        } catch (SQLException ex) {
-//            MensagemErro = "Não foi possível inserir: " + ex.getMessage();
-//        }
-//        return Executou;
+        }    
     }
 
     /**
@@ -200,9 +172,7 @@ public class ProdutosMovimentosDAO implements ClasseDAO {
                 PreparedStatement SQL = con.prepareStatement("select * from produtosmovimentos where ID_Movimento = ?");
                 SQL.setInt(1, getIdMovimento());
                 setRsDados(SQL.executeQuery());
-                executou = true;
-                
-                setProdutoMovimento();
+                executou = getRsDados().next();
             } catch (SQLException sqlE) {
                 ge.setCodError(0); // NUMERO COD ERRO
                 throw new Exception(ge.msgError());
@@ -219,12 +189,14 @@ public class ProdutosMovimentosDAO implements ClasseDAO {
      * Metodo para pesquisar um dado ja existente na tabela produtosmovimentos a
      * partir do seu id.
      * 
+     * @param idProduto - id do produto a ser pesquisado.
+     * 
      * @return true  - pesquisa efetuada com sucesso.
      *         false - erro na pesquisa.
      * 
      * @throws java.lang.Exception - Mensagem referente ao codigo de erro.
      */
-    public boolean pesquisarIdProduto() throws Exception {
+    public boolean pesquisar(int idProduto) throws Exception {
         if (conferir(2)) {
             boolean executou = false;
             try {
@@ -232,9 +204,7 @@ public class ProdutosMovimentosDAO implements ClasseDAO {
                 PreparedStatement SQL = con.prepareStatement("select * from produtosmovimentos where ID_Produto = ?");
                 SQL.setInt(1, getIdProduto());
                 setRsDados(SQL.executeQuery());
-                executou = true;
-                
-                setProdutoMovimento();
+                executou = getRsDados().next();
             } catch (SQLException sqlE) {
                 ge.setCodError(0); // NUMERO COD ERRO
                 throw new Exception(ge.msgError());
@@ -245,29 +215,6 @@ public class ProdutosMovimentosDAO implements ClasseDAO {
             ge.setCodError(0); // NUMERO COD ERRO
             throw new Exception(ge.msgError());
         }
-//  public boolean pesquisar(String produto) throws Exception {
-//        Connection con;
-//        MensagemErro = "";
-//        boolean Executou = true;
-//        try {
-//            con = new ConexaoDAO().conectar();
-//            PreparedStatement SQL = con.prepareStatement("select * from produtosmovimentos where ID_Produto = ?");   
-//            SQL.setInt(1, this.getID_Produto());
-//            
-//            try {
-//                rsDados = SQL.executeQuery();
-//                Executou = rsDados.next();
-//                SetProdutoMovimento();
-//            } catch (SQLException e) {
-//                Executou = false;
-//                MensagemErro = "Erro ao realizar a busca dos dados: " + e.getMessage();
-//            }
-//            
-//        } catch (SQLException ex) {
-//            MensagemErro = "Erro ao realizar a busca dos dados: " + ex.getMessage();
-//        }
-//        
-//        return Executou;
     }
     
     /**
