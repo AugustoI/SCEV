@@ -8,22 +8,17 @@ package Telas;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.Initializable;
-import javax.swing.JOptionPane;
 
 /**
  * FXML Controller class
  *
  * @author ACER
  */
-public class MenuController implements Initializable {
+public class ClientesGUIController implements Initializable {
 
     /**
      * Initializes the controller class.
      */
-    public void chamaClientes() {
-        
-    }
-    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
